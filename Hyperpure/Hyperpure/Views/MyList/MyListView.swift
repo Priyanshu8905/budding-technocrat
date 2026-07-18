@@ -196,48 +196,16 @@ struct MyListView: View {
                                 }
                             }
                         } else {
-                            // Category Filter Row (Segmented control)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    // "All" filter pill
-                                    Button {
-                                        selectedCategoryId = nil
-                                    } label: {
-                                        Text("All")
-                                            .font(.caption.weight(.bold))
-                                            .foregroundColor(selectedCategoryId == nil ? .white : Theme.textPrimary)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 8)
-                                            .background(selectedCategoryId == nil ? Theme.navyDark : Color.white)
-                                            .clipShape(Capsule())
-                                            .overlay(
-                                                Capsule().stroke(Color.gray.opacity(0.15), lineWidth: selectedCategoryId == nil ? 0 : 1)
-                                            )
-                                    }
-                                    
-                                    ForEach(availableCategories) { cat in
-                                        Button {
-                                            selectedCategoryId = cat.id
-                                        } label: {
-                                            HStack(spacing: 4) {
-                                                Text(cat.icon)
-                                                Text(cat.shortName)
-                                            }
-                                            .font(.caption.weight(.bold))
-                                            .foregroundColor(selectedCategoryId == cat.id ? .white : Theme.textPrimary)
-                                            .padding(.horizontal, 14)
-                                            .padding(.vertical, 8)
-                                            .background(selectedCategoryId == cat.id ? Theme.navyDark : Color.white)
-                                            .clipShape(Capsule())
-                                            .overlay(
-                                                Capsule().stroke(Color.gray.opacity(0.15), lineWidth: selectedCategoryId == cat.id ? 0 : 1)
-                                            )
-                                        }
-                                    }
+                            // Category Filter (Segmented control)
+                            Picker("Category", selection: $selectedCategoryId) {
+                                Text("All").tag(nil as String?)
+                                ForEach(availableCategories) { cat in
+                                    Text("\(cat.icon) \(cat.shortName)").tag(cat.id as String?)
                                 }
-                                .padding(.horizontal, 16)
-                                .padding(.bottom, 4)
                             }
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 8)
                             
                             // Summary bar / Quick Actions Card
                             HStack(spacing: 16) {
