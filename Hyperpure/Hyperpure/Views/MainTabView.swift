@@ -11,7 +11,7 @@ struct MainTabView: View {
         TabView(selection: $selectedTab) {
             HomeView(
                 onNavigateToCategory: { categoryId in
-                    // Navigate to category action
+                    // Navigate action
                 },
                 onOpenSmartLists: {
                     isSmartListsPresented = true
@@ -39,11 +39,15 @@ struct MainTabView: View {
             .badge("NEW")
             .tag(1)
             
-            OrdersView()
-                .tabItem {
-                    Label("Orders", systemImage: "bag.fill")
+            OrdersView(
+                onStartShopping: {
+                    selectedTab = 0
                 }
-                .tag(2)
+            )
+            .tabItem {
+                Label("Orders", systemImage: "bag.fill")
+            }
+            .tag(2)
             
             AccountView()
                 .tabItem {

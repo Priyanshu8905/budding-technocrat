@@ -180,6 +180,7 @@ struct AccountView: View {
                 .padding(16)
             }
             .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.inline)
         }
     }

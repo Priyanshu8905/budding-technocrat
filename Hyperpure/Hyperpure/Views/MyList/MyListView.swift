@@ -9,7 +9,7 @@ struct MyListView: View {
             VStack(spacing: 24) {
                 Spacer()
                 
-                // Phone Mockup Graphic (Screenshot 2)
+                // Phone Mockup Graphic
                 ZStack {
                     RoundedRectangle(cornerRadius: 32)
                         .stroke(Theme.navyDark, lineWidth: 10)
@@ -96,16 +96,18 @@ struct MyListView: View {
                 .padding(.bottom, 24)
             }
             .background(Color.white)
+            .navigationTitle("My List")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 12) {
                         Button {
-                            // Search
+                            // Search action
                         } label: {
                             Image(systemName: "magnifyingglass")
                                 .font(.body)
                                 .foregroundColor(Theme.primary)
-                                .frame(width: 36, height: 36)
+                                .frame(width: 34, height: 34)
                                 .background(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 1))
                         }
                         
@@ -115,7 +117,7 @@ struct MyListView: View {
                             Image(systemName: "cart")
                                 .font(.body)
                                 .foregroundColor(Theme.textPrimary)
-                                .frame(width: 36, height: 36)
+                                .frame(width: 34, height: 34)
                                 .background(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 1))
                         }
                     }
