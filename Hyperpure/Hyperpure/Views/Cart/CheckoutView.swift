@@ -1,5 +1,5 @@
 // CheckoutView.swift
-// Checkout screen with dynamic card/COD payment support and grace window integration.
+// Interactive Checkout management screen supporting simulated Card Payments and Cash on Delivery with grace windows.
 
 import SwiftUI
 import ActivityKit
@@ -7,262 +7,270 @@ import ActivityKit
 struct CheckoutView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(CartViewModel.self) private var cartViewModel
-
+    
+    enum PaymentMethod {
+        case card
+        case cod
+    }
+    
     enum CheckoutScreenState: Equatable {
         case idle
         case processingPayment
+        case gracePeriodActive(secondsRemaining: Int)
+        case orderPlacedAndLocked
     }
-
-    @State private var selectedPaymentMethod: PaymentType = .cashOnDelivery
+    
+    @State private var selectedPaymentMethod: PaymentMethod = .cod
     @State private var screenState: CheckoutScreenState = .idle
+    @State private var orderID: String = ""
     @State private var navigateToConfirmation = false
     @State private var shouldStartGraceOnConfirm = true
-
+    
     var body: some View {
         ZStack {
-            Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
-
+            Color(uiColor: .systemGroupedBackground)
+                .ignoresSafeArea()
+            
             VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Button { dismiss() } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left").bold()
-                            Text("Cart")
-                        }
-                        .foregroundColor(Theme.primary)
-                    }
-                    Spacer()
-                    Text("Secure Checkout")
-                        .font(.headline).foregroundColor(Theme.textPrimary)
-                    Spacer()
-                    Text("Back").foregroundColor(.clear)
-                }
-                .padding()
-                .background(Color(uiColor: .systemBackground))
-
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Order Summary
+                        // Order details Summary Card
                         VStack(alignment: .leading, spacing: 12) {
                             Text("ORDER DETAILS")
-                                .font(.caption.bold()).foregroundColor(Theme.textMuted)
-
+                                .font(.caption.bold())
+                                .foregroundColor(Theme.textMuted)
+                            
                             ForEach(cartViewModel.items) { item in
                                 HStack {
                                     Text("\(item.product.name) (x\(item.quantity))")
-                                        .font(.subheadline).foregroundColor(Theme.textPrimary)
+                                        .font(.subheadline)
+                                        .foregroundColor(Theme.textPrimary)
                                     Spacer()
-                                    Text("₹\(item.product.price * Double(item.quantity), specifier: "%.0f")")
-                                        .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
+                                    Text("₹\(item.product.price * Double(item.quantity), specifier: "%.2f")")
+                                        .font(.subheadline.bold())
+                                        .foregroundColor(Theme.textPrimary)
                                 }
                             }
-
+                            
                             Divider()
-
-                            SummaryRow(title: "Subtotal", value: "₹\(cartViewModel.subtotal)")
-                            SummaryRow(title: "GST (5%)", value: "₹\(cartViewModel.tax)")
-                            SummaryRow(title: "Delivery", value: cartViewModel.deliveryFee == 0 ? "FREE" : "₹\(cartViewModel.deliveryFee)")
-
-                            Divider()
-
+                            
                             HStack {
-                                Text("Grand Total").font(.headline).foregroundColor(Theme.textPrimary)
+                                Text("Grand Total")
+                                    .font(.headline)
+                                    .foregroundColor(Theme.textPrimary)
                                 Spacer()
                                 Text("₹\(cartViewModel.grandTotal)")
-                                    .font(.title3.bold()).foregroundColor(Theme.primary)
+                                    .font(.title3.bold())
+                                    .foregroundColor(Theme.primary)
                             }
                         }
-                        .padding()
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(Theme.radiusMd)
-                        .padding(.horizontal)
-
-                        // Delivery address
+                        .padding(16)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        
+                        // Delivery Outpost Address Card
                         VStack(alignment: .leading, spacing: 10) {
                             Text("DELIVERY COORDINATES")
-                                .font(.caption.bold()).foregroundColor(Theme.textMuted)
+                                .font(.caption.bold())
+                                .foregroundColor(Theme.textMuted)
+                            
                             HStack(spacing: 12) {
                                 Image(systemName: "mappin.and.ellipse")
-                                    .font(.title3).foregroundColor(Theme.primary)
+                                    .font(.title3)
+                                    .foregroundColor(Theme.primary)
+                                
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Kitchen Outpost Delhi-NCR (NCR-08)")
-                                        .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
+                                        .font(.subheadline.bold())
+                                        .foregroundColor(Theme.textPrimary)
                                     Text("Connaught Place Block-B, New Delhi, 110001")
-                                        .font(.caption).foregroundColor(Theme.textSecondary)
+                                        .font(.caption)
+                                        .foregroundColor(Theme.textSecondary)
                                 }
+                                
+                                Spacer()
                             }
                         }
-                        .padding()
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(Theme.radiusMd)
-                        .padding(.horizontal)
-
-                        // Payment selector
+                        .padding(16)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        
+                        // Payment Method Selection Card
                         VStack(alignment: .leading, spacing: 14) {
                             Text("PAYMENT MODE")
-                                .font(.caption.bold()).foregroundColor(Theme.textMuted)
-
-                            Button { selectedPaymentMethod = .cashOnDelivery } label: {
+                                .font(.caption.bold())
+                                .foregroundColor(Theme.textMuted)
+                            
+                            Button {
+                                selectedPaymentMethod = .cod
+                            } label: {
                                 paymentRow(
                                     title: "Cash on Delivery (COD)",
-                                    subtitle: "Pay in cash at delivery",
                                     icon: "indianrupeesign.circle.fill",
-                                    isSelected: selectedPaymentMethod == .cashOnDelivery
+                                    isSelected: selectedPaymentMethod == .cod
                                 )
-                            }.buttonStyle(.plain)
-
-                            Divider()
-
-                            Button { selectedPaymentMethod = .cardPayment } label: {
-                                paymentRow(
-                                    title: "Credit / Debit Card",
-                                    subtitle: "Instant payment — no grace window",
-                                    icon: "creditcard.fill",
-                                    isSelected: selectedPaymentMethod == .cardPayment
-                                )
-                            }.buttonStyle(.plain)
-
-                            // Dynamic payment badge
-                            if selectedPaymentMethod == .cardPayment {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "lock.shield.fill")
-                                        .font(.caption).foregroundColor(.green)
-                                    Text("Paid via Credit Card — Instant order lock")
-                                        .font(.caption.bold()).foregroundColor(.green)
-                                }
-                                .padding(.horizontal, 10).padding(.vertical, 6)
-                                .background(Color.green.opacity(0.08))
-                                .cornerRadius(8)
-                                .transition(.move(edge: .top).combined(with: .opacity))
                             }
+                            .buttonStyle(.plain)
+                            
+                            Divider()
+                            
+                            Button {
+                                selectedPaymentMethod = .card
+                            } label: {
+                                paymentRow(
+                                    title: "Credit/Debit Card (Simulated)",
+                                    icon: "creditcard.fill",
+                                    isSelected: selectedPaymentMethod == .card
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .padding()
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(Theme.radiusMd)
-                        .padding(.horizontal)
-                        .animation(.spring(response: 0.35), value: selectedPaymentMethod)
+                        .padding(16)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        
+                        Spacer()
                     }
                     .padding(.vertical)
                 }
-
-                // CTA
+                
+                // Confirm Bottom Action Button (Capsule shaped)
                 VStack {
-                    Button { processFulfillment() } label: {
-                        Text(selectedPaymentMethod == .cardPayment
-                             ? "Process Card Payment & Order"
-                             : "Place Order (Cash on Delivery)")
+                    Button {
+                        processFulfillment()
+                    } label: {
+                        Text(selectedPaymentMethod == .card ? "Process Payment & Order" : "Place Order (COD)")
                             .font(.headline.bold())
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
-                            .padding()
+                            .padding(.vertical, 14)
                             .background(Theme.primary)
-                            .cornerRadius(Theme.radiusMd)
+                            .clipShape(Capsule())
                     }
-                    .padding()
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                 }
-                .background(Color(uiColor: .systemBackground))
             }
-
-            // Card processing overlay
+            
+            // Full Screen Overlay for Payment / Grace Period states
             if screenState == .processingPayment {
-                paymentProcessingOverlay()
+                overlayStateView()
             }
         }
-        .navigationBarHidden(true)
+        .navigationTitle("Secure Checkout")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
+                }
+            }
+            
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    processFulfillment()
+                } label: {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Theme.textPrimary)
+                }
+            }
+        }
         .navigationDestination(isPresented: $navigateToConfirmation) {
             OrderConfirmationView(
+                orderID: orderID,
+                amount: cartViewModel.grandTotal,
                 shouldStartGracePeriod: shouldStartGraceOnConfirm
             )
         }
         .onAppear {
-            cartViewModel.applyWeatherBuffer()
+            orderID = "#HP-" + String(Int.random(in: 1000...9999))
         }
     }
-
-    // MARK: - Payment Row
-    private func paymentRow(title: String, subtitle: String, icon: String, isSelected: Bool) -> some View {
+    
+    private func paymentRow(title: String, icon: String, isSelected: Bool) -> some View {
         HStack {
             Image(systemName: icon)
                 .font(.title3)
                 .foregroundColor(isSelected ? Theme.primary : Theme.textMuted)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
-                Text(subtitle).font(.caption).foregroundColor(Theme.textMuted)
-            }
+            
+            Text(title)
+                .font(.subheadline.bold())
+                .foregroundColor(Theme.textPrimary)
+            
             Spacer()
+            
             Circle()
                 .stroke(isSelected ? Theme.primary : Color.gray.opacity(0.4), lineWidth: 2)
                 .frame(width: 20, height: 20)
-                .overlay(Circle().fill(isSelected ? Theme.primary : .clear).frame(width: 10, height: 10))
+                .overlay(
+                    Circle()
+                        .fill(isSelected ? Theme.primary : Color.clear)
+                        .frame(width: 10, height: 10)
+                )
         }
         .contentShape(Rectangle())
     }
-
-    // MARK: - Card Processing Overlay
+    
     @ViewBuilder
-    private func paymentProcessingOverlay() -> some View {
+    private func overlayStateView() -> some View {
         ZStack {
-            Color.black.opacity(0.85).ignoresSafeArea()
+            Color.black.opacity(0.85)
+                .ignoresSafeArea()
+            
             VStack(spacing: 24) {
                 VStack(spacing: 16) {
-                    Image(systemName: "creditcard.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.white)
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(1.4)
-                    Text("Processing Card Payment...")
-                        .font(.headline).foregroundColor(.white)
-                    Text("Connecting securely to payment gateway...")
-                        .font(.caption).foregroundColor(.white.opacity(0.6))
+                        .scaleEffect(1.5)
+                    
+                    Text("Processing Payment...")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    Text("Connecting securely to server gateway...")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.6))
                 }
             }
-            .padding(28)
+            .padding(24)
             .background(.ultraThinMaterial)
             .cornerRadius(24)
-            .padding(.horizontal, 32)
+            .padding(.horizontal, 24)
         }
     }
-
-    // MARK: - Fulfillment Logic
+    
     private func processFulfillment() {
-        if selectedPaymentMethod == .cardPayment {
-            // Show spinner, then place order with 30-second grace window (just like COD)
+        if selectedPaymentMethod == .card {
             screenState = .processingPayment
             Task {
                 try? await Task.sleep(for: .seconds(2.5))
-                await MainActor.run {
-                    screenState = .idle
-                    shouldStartGraceOnConfirm = true
-
-                    CheckoutManager.shared.startCheckout(
-                        items: cartViewModel.items,
-                        subtotal: cartViewModel.subtotal,
-                        tax: cartViewModel.tax,
-                        deliveryFee: cartViewModel.deliveryFee,
-                        grandTotal: cartViewModel.grandTotal,
-                        paymentType: .cardPayment
-                    )
-
-                    // Clear cart — order placed
-                    cartViewModel.clear()
-                    navigateToConfirmation = true
-                }
+                screenState = .idle
+                shouldStartGraceOnConfirm = false
+                navigateToConfirmation = true
             }
         } else {
-            // COD — 30-second grace window
             shouldStartGraceOnConfirm = true
-            CheckoutManager.shared.startCheckout(
-                items: cartViewModel.items,
-                subtotal: cartViewModel.subtotal,
-                tax: cartViewModel.tax,
-                deliveryFee: cartViewModel.deliveryFee,
-                grandTotal: cartViewModel.grandTotal,
-                paymentType: .cashOnDelivery
-            )
-            // Clear cart — order placed
-            cartViewModel.clear()
             navigateToConfirmation = true
         }
     }
