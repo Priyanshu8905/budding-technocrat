@@ -3,20 +3,17 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF1D7A177A634AB6ACA50BFE /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFA050FB0F934D41B3C41502 /* AppState.swift */; };
 		0381C5676EFC480585F3F5DF /* OrdersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E76823D6073645718E38CBCB /* OrdersView.swift */; };
 		04CC63CD6AC44218A79DF2DC /* MyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF78981F79A4F85918D8006 /* MyListView.swift */; };
 		0977C340E30F4F41BA7874D5 /* StatsCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC6D492219D4C1390D64555 /* StatsCounterView.swift */; };
-		0B162930C93549B298079696 /* AddPantryItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F9E4EA975C4AD896EA8E95 /* AddPantryItemView.swift */; };
 		10C6AF0831D04872AFF70C60 /* BlogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC88CD9F41D547A9B8BC823D /* BlogView.swift */; };
 		20D43060D0AE40858607D8CA /* MockProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064707CAB3BA4825B5C9364F /* MockProducts.swift */; };
 		275620627CD247EA910C4F75 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AC64EB04684E829D676F02 /* ToastView.swift */; };
 		2C91D3B00DCC479D84090A99 /* ProductRailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C43C21132574F18BE4607F9 /* ProductRailView.swift */; };
-		2EDF036C287B49498B8B83FE /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A75DD5FCD8B4F59A88546AA /* MainTabView.swift */; };
 		33DEF64F78AB4390BFB22331 /* OfferBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A3BAB1F4E0457BB8282A8F /* OfferBannerView.swift */; };
 		36B843843E2A41FD8E3BE155 /* QualityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64465833B56A474A9B3580F6 /* QualityView.swift */; };
 		38AF3843FC8240D98E231B6B /* MockContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1D0C150613442D29D224253 /* MockContent.swift */; };
@@ -30,7 +27,6 @@
 		57F8B66BD99143D8A4CA792C /* PantryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B450837C2A9D4E008DBD5556 /* PantryItem.swift */; };
 		6834E086E3DE4ACA8D449505 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7D3BF240E5419A92390D44 /* AccountView.swift */; };
 		6A50D1252C334C5A84556AC7 /* FeaturedProductsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6F5DADD921405C90815230 /* FeaturedProductsView.swift */; };
-		75E80D89571F4FB0993092E9 /* SmartPantryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37287A1BB564D33B26C3000 /* SmartPantryView.swift */; };
 		83A8B142240C4F10B14E2862 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29849A8B8BFE4FEBA239E390 /* Theme.swift */; };
 		902639E328B64D339F2704BD /* SmartListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EABABF4A7F4F3EA783DCE3 /* SmartListsView.swift */; };
 		935FC842BAC14A72A455379A /* SupplyChainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F81D556B756744349D06A994 /* SupplyChainView.swift */; };
@@ -38,6 +34,7 @@
 		B325060126E54D6E9C23DFF6 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293831E6BBE642E2BD6B962B /* Product.swift */; };
 		BBF1B0E06DDF426883A95C47 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AC4B2C5C448DD92BCE4E2 /* CartItem.swift */; };
 		BD883CC007DB4B198B44EC2A /* FAQAccordionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C4782FFB02A440BB72CB666 /* FAQAccordionView.swift */; };
+		BF1D7A177A634AB6ACA50BFE /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFA050FB0F934D41B3C41502 /* AppState.swift */; };
 		C0723937300BBBC4006722AC /* HyperPureSiriIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0723936300BBBC4006722AC /* HyperPureSiriIntents.swift */; };
 		C5D5A383FEBB4C2DA7ED1281 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7900CF5E7622499080CC4659 /* SearchBarView.swift */; };
 		CC333DFCB84C41A49F741FEC /* CategoriesSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2A125D9EC347E0A4802511 /* CategoriesSheetView.swift */; };
@@ -60,16 +57,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CFA050FB0F934D41B3C41502 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = Hyperpure/Models/AppState.swift; sourceTree = "<group>"; };
 		02ACD95B52AC401DB81D0338 /* ContentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentModels.swift; path = Hyperpure/Models/ContentModels.swift; sourceTree = "<group>"; };
 		064707CAB3BA4825B5C9364F /* MockProducts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MockProducts.swift; path = Hyperpure/Data/MockProducts.swift; sourceTree = "<group>"; };
 		08EF78AA484041CDB11F16C3 /* HeroBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeroBannerView.swift; path = Hyperpure/Views/Home/HeroBannerView.swift; sourceTree = "<group>"; };
-		0A75DD5FCD8B4F59A88546AA /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MainTabView.swift; path = Hyperpure/Views/MainTabView.swift; sourceTree = "<group>"; };
 		0C4782FFB02A440BB72CB666 /* FAQAccordionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FAQAccordionView.swift; path = Hyperpure/Views/Home/FAQAccordionView.swift; sourceTree = "<group>"; };
 		0F0F68110B354FC3A7F1D903 /* CartViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CartViewModel.swift; path = Hyperpure/ViewModels/CartViewModel.swift; sourceTree = "<group>"; };
 		1056BD7ABC2C4289948E012C /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeViewModel.swift; path = Hyperpure/ViewModels/HomeViewModel.swift; sourceTree = "<group>"; };
 		161CD81751054DB0903D98E1 /* TestimonialSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestimonialSliderView.swift; path = Hyperpure/Views/Home/TestimonialSliderView.swift; sourceTree = "<group>"; };
-		17F9E4EA975C4AD896EA8E95 /* AddPantryItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddPantryItemView.swift; path = Hyperpure/Views/Pantry/AddPantryItemView.swift; sourceTree = "<group>"; };
 		26847FC58B604298A66C7881 /* HyperpureApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HyperpureApp.swift; path = Hyperpure/App/HyperpureApp.swift; sourceTree = "<group>"; };
 		293831E6BBE642E2BD6B962B /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Product.swift; path = Hyperpure/Models/Product.swift; sourceTree = "<group>"; };
 		29849A8B8BFE4FEBA239E390 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Theme.swift; path = Hyperpure/App/Theme.swift; sourceTree = "<group>"; };
@@ -90,14 +84,15 @@
 		90CDF8F82ACD4E18A0F4C443 /* SustainabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SustainabilityView.swift; path = Hyperpure/Views/Sustainability/SustainabilityView.swift; sourceTree = "<group>"; };
 		93C5385BCC874DDE9955D132 /* PantryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PantryViewModel.swift; path = Hyperpure/ViewModels/PantryViewModel.swift; sourceTree = "<group>"; };
 		A31135A0BA8C42A2B55D06CD /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeView.swift; path = Hyperpure/Views/Home/HomeView.swift; sourceTree = "<group>"; };
-		A37287A1BB564D33B26C3000 /* SmartPantryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartPantryView.swift; path = Hyperpure/Views/Pantry/SmartPantryView.swift; sourceTree = "<group>"; };
 		AB2A125D9EC347E0A4802511 /* CategoriesSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CategoriesSheetView.swift; path = Hyperpure/Views/Home/CategoriesSheetView.swift; sourceTree = "<group>"; };
 		AF739E3EEFAA4171BD2CC220 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Category.swift; path = Hyperpure/Models/Category.swift; sourceTree = "<group>"; };
 		B2E94EC54DE745D4A4A0E1E5 /* PantryAIProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PantryAIProcessor.swift; path = Hyperpure/Models/PantryAIProcessor.swift; sourceTree = "<group>"; };
 		B450837C2A9D4E008DBD5556 /* PantryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PantryItem.swift; path = Hyperpure/Models/PantryItem.swift; sourceTree = "<group>"; };
 		B71802CCAD8347D2904442BF /* CategoryGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CategoryGridView.swift; path = Hyperpure/Views/Home/CategoryGridView.swift; sourceTree = "<group>"; };
 		C0723936300BBBC4006722AC /* HyperPureSiriIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperPureSiriIntents.swift; sourceTree = "<group>"; };
+		C072393A300BE04A006722AC /* Hyperpure.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Hyperpure.entitlements; path = Hyperpure/Hyperpure.entitlements; sourceTree = "<group>"; };
 		CE58B64873144B83B528F23B /* CatalogueViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CatalogueViewModel.swift; path = Hyperpure/ViewModels/CatalogueViewModel.swift; sourceTree = "<group>"; };
+		CFA050FB0F934D41B3C41502 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = Hyperpure/Models/AppState.swift; sourceTree = "<group>"; };
 		D1D0C150613442D29D224253 /* MockContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MockContent.swift; path = Hyperpure/Data/MockContent.swift; sourceTree = "<group>"; };
 		D8171C5B05A14D13A625D701 /* WeatherModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WeatherModels.swift; path = Hyperpure/Models/WeatherModels.swift; sourceTree = "<group>"; };
 		D8171C5B05A14D13A625D702 /* WeatherIntelligenceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WeatherIntelligenceViewModel.swift; path = Hyperpure/ViewModels/WeatherIntelligenceViewModel.swift; sourceTree = "<group>"; };
@@ -111,6 +106,11 @@
 		F81D556B756744349D06A994 /* SupplyChainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupplyChainView.swift; path = Hyperpure/Views/Home/SupplyChainView.swift; sourceTree = "<group>"; };
 		FAB43CF0159F47F88FBB38CD /* ProductDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProductDetailView.swift; path = Hyperpure/Views/ProductDetail/ProductDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C0723938300BDF4E006722AC /* Main Tab */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Main Tab"; sourceTree = "<group>"; };
+		C0723939300BDFFD006722AC /* Pantry */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Pantry; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
 		02D5C9BD78304054BC6EB439 /* Sustainability */ = {
@@ -140,10 +140,9 @@
 		140FD2E4688B4BDD8B893941 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				17F9E4EA975C4AD896EA8E95 /* AddPantryItemView.swift */,
-				A37287A1BB564D33B26C3000 /* SmartPantryView.swift */,
+				C0723939300BDFFD006722AC /* Pantry */,
 				D8171C5B05A14D13A625D705 /* Weather */,
-				0A75DD5FCD8B4F59A88546AA /* MainTabView.swift */,
+				C0723938300BDF4E006722AC /* Main Tab */,
 				ACFBD171183B4E45AE855DD5 /* Components */,
 				DFF3696F35A34242B7B9B46B /* Home */,
 				AD93431A1A7643F196A79E70 /* MyList */,
@@ -206,6 +205,7 @@
 		7DB20081DE73403BBE31A211 = {
 			isa = PBXGroup;
 			children = (
+				C072393A300BE04A006722AC /* Hyperpure.entitlements */,
 				747718436FED4CA4B932A79B /* App */,
 				D8171C5B05A14D13A625D7C3 /* Models */,
 				3884D708A5CD46C9BEEAEB39 /* Data */,
@@ -318,6 +318,10 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				C0723938300BDF4E006722AC /* Main Tab */,
+				C0723939300BDFFD006722AC /* Pantry */,
+			);
 			name = Hyperpure;
 			productName = Hyperpure;
 			productType = "com.apple.product-type.application";
@@ -364,8 +368,6 @@
 				C0723937300BBBC4006722AC /* HyperPureSiriIntents.swift in Sources */,
 				4099FA38AFDD40B580384C5D /* PantryAIProcessor.swift in Sources */,
 				97161C7D2B364D38910DC7DE /* PantryViewModel.swift in Sources */,
-				75E80D89571F4FB0993092E9 /* SmartPantryView.swift in Sources */,
-				0B162930C93549B298079696 /* AddPantryItemView.swift in Sources */,
 				E2F614BEA8A94CF3BC39D701 /* WeatherModels.swift in Sources */,
 				E2F614BEA8A94CF3BC39D702 /* WeatherIntelligenceViewModel.swift in Sources */,
 				E2F614BEA8A94CF3BC39D703 /* WeatherWidgetView.swift in Sources */,
@@ -382,7 +384,6 @@
 				46ECD91B50754F0D9FDAAB9E /* CartViewModel.swift in Sources */,
 				5126A74F440F4A4B8D5288AD /* CatalogueViewModel.swift in Sources */,
 				E96BFEADA0A446DD882D0E90 /* HomeViewModel.swift in Sources */,
-				2EDF036C287B49498B8B83FE /* MainTabView.swift in Sources */,
 				E5F9A05A91DF4621A0F91F6E /* ProductCardView.swift in Sources */,
 				C5D5A383FEBB4C2DA7ED1281 /* SearchBarView.swift in Sources */,
 				275620627CD247EA910C4F75 /* ToastView.swift in Sources */,
@@ -437,6 +438,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Hyperpure/Hyperpure.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73B8W4ZN6V;
@@ -450,7 +452,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hyperpure.app;
+				PRODUCT_BUNDLE_IDENTIFIER = hyperpure.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -461,6 +463,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Hyperpure/Hyperpure.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73B8W4ZN6V;
@@ -474,7 +477,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hyperpure.app;
+				PRODUCT_BUNDLE_IDENTIFIER = hyperpure.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
