@@ -105,5 +105,4 @@ struct HomeView: View {
 #Preview {
     HomeView()
         .environment(CartViewModel())
-        .environment(AuthViewModel())
 }

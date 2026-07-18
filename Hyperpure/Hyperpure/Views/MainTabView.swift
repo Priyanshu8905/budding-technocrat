@@ -5,7 +5,6 @@ struct MainTabView: View {
     @State private var isSmartListsPresented = false
     @State private var isCartPresented = false
     @Environment(CartViewModel.self) private var cartViewModel
-    @Environment(AuthViewModel.self) private var authViewModel
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -62,14 +61,10 @@ struct MainTabView: View {
         .sheet(isPresented: $isCartPresented) {
             CartView()
         }
-        .sheet(isPresented: Bindable(authViewModel).isLoginSheetPresented) {
-            LoginView()
-        }
     }
 }
 
 #Preview {
     MainTabView()
         .environment(CartViewModel())
-        .environment(AuthViewModel())
 }
