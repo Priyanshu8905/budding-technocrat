@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
+    @State private var weatherViewModel = WeatherIntelligenceViewModel()
     @State private var isCategoriesSheetPresented = false
     @Environment(CartViewModel.self) private var cartViewModel
     var onNavigateToCategory: ((String) -> Void)?
@@ -17,6 +18,13 @@ struct HomeView: View {
                             onOpenSmartLists: onOpenSmartLists,
                             onOpenCart: onOpenCart
                         )
+                        
+                        NavigationLink(destination: WeatherIntelligenceView()) {
+                            WeatherWidgetView(snapshot: weatherViewModel.weatherSnapshot) {
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                        .buttonStyle(.plain)
                         
                         BannerView()
                         
