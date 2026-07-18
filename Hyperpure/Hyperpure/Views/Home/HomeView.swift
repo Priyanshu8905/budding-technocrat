@@ -1,101 +1,93 @@
-// HomeView.swift
-// Main dashboard for searching products and presenting the floating tracking card & detail modal.
-
 import SwiftUI
 import MapKit
 
 struct HomeView: View {
-    @Environment(CartViewModel.self) private var cartViewModel
+    @State private var viewModel = HomeViewModel()
+    @State private var searchText: String = ""
+    @State private var weatherViewModel = WeatherIntelligenceViewModel.shared
+    @State private var isCategoriesSheetPresented = false
+    @State private var isTrackingSheetPresented = false
     @State private var checkoutManager = CheckoutManager.shared
-
+    @Environment(CartViewModel.self) private var cartViewModel
     var onNavigateToCategory: ((String) -> Void)?
     var onOpenSmartLists: (() -> Void)?
     var onOpenCart: (() -> Void)?
     var onOpenAccount: (() -> Void)?
-
-    @State private var isCategoriesSheetPresented = false
-    @State private var isTrackingSheetPresented = false
-
+    
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottom) {
-                Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
-
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
+                ZStack(alignment: .bottomTrailing) {
                     ScrollView {
-                        VStack(spacing: 20) {
-                            // Search bar trigger
-                            Button {
-                                isCategoriesSheetPresented = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: "magnifyingglass")
-                                        .foregroundColor(Theme.textSecondary)
-                                    Text("Search wholesale ingredients, eggs, poultry...")
-                                        .foregroundColor(Theme.textMuted)
-                                        .font(.subheadline)
-                                    Spacer()
-                                }
-                                .padding()
-                                .background(Color(uiColor: .systemBackground))
-                                .cornerRadius(Theme.radiusMd)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: Theme.radiusMd)
-                                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                                )
+                        VStack(spacing: 18) {
+                            HeaderView(
+                                onOpenSmartLists: onOpenSmartLists,
+                                onOpenCart: onOpenCart
+                            )
+                            
+                            BannerView { categoryId in
+                                onNavigateToCategory?(categoryId)
                             }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal)
-                            .padding(.top, 10)
-
-                            // Weather Alert Callout
-                            WeatherInsightsCalloutView()
-
-                            // Popular Products Grid
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Popular Sourcing Stocks")
-                                    .font(.headline)
-                                    .foregroundColor(Theme.textPrimary)
-                                    .padding(.horizontal)
-
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 12) {
-                                        ForEach(MockProducts.products.filter(\.isPopular)) { product in
-                                            PopularProductCard(product: product)
-                                        }
-                                    }
-                                    .padding(.horizontal)
+                            
+                            CategoryGridView(
+                                categories: viewModel.categories,
+                                onOpenAllCategories: {
+                                    isCategoriesSheetPresented = true
+                                },
+                                onSelectCategory: { categoryId in
+                                    onNavigateToCategory?(categoryId)
                                 }
-                            }
-
-                            // Sourcing categories banner
-                            Button {
-                                isCategoriesSheetPresented = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: "shippingbox.fill")
-                                        .font(.title2)
-                                        .foregroundColor(.white)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Browse Wholesale Catalog")
-                                            .font(.subheadline.bold())
-                                            .foregroundColor(.white)
-                                        Text("Bulk flour, raw meats, packaging materials & more")
-                                            .font(.caption)
-                                            .foregroundColor(.white.opacity(0.8))
-                                    }
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.white)
-                                }
-                                .padding()
-                                .background(Theme.primary)
-                                .cornerRadius(Theme.radiusMd)
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal)
+                            )
+                            
+                            // Rail 1: Chicken & Eggs
+                            ProductRailView(
+                                categoryName: "Chicken & Eggs",
+                                categorySubtitle: "sourced locally",
+                                products: MockProducts.products.filter { $0.category == "chicken-eggs" },
+                                onSeeAll: { onNavigateToCategory?("chicken-eggs") }
+                            )
+                            
+                            // Rail 2: Frozen & Instant Food
+                            ProductRailView(
+                                categoryName: "Frozen & Instant Food",
+                                categorySubtitle: "ready to cook & eat",
+                                products: MockProducts.products.filter { $0.category == "frozen" },
+                                onSeeAll: { onNavigateToCategory?("frozen") }
+                            )
+                            
+                            // Rail 3: Sauces & Seasoning
+                            ProductRailView(
+                                categoryName: "Sauces & Seasoning",
+                                categorySubtitle: "flavour enhancers",
+                                products: MockProducts.products.filter { $0.category == "sauces-seasoning" },
+                                onSeeAll: { onNavigateToCategory?("sauces-seasoning") }
+                            )
+                            
+                            // Rail 4: Canned & Imported Items
+                            ProductRailView(
+                                categoryName: "Canned & Imported Items",
+                                categorySubtitle: "for your gourmet needs",
+                                products: MockProducts.products.filter { $0.category == "canned-imported" },
+                                onSeeAll: { onNavigateToCategory?("canned-imported") }
+                            )
+                            
+                            // Rail 5: Packaging Material
+                            ProductRailView(
+                                categoryName: "Packaging Material",
+                                categorySubtitle: "all packaging essentials",
+                                products: MockProducts.products.filter { $0.category == "packaging" },
+                                onSeeAll: { onNavigateToCategory?("packaging") }
+                            )
+                            
+                            // Rail 6: Bakery & Chocolates
+                            ProductRailView(
+                                categoryName: "Bakery & Chocolates",
+                                categorySubtitle: "bakery & chocolates",
+                                products: MockProducts.products.filter { $0.category == "bakery" },
+                                onSeeAll: { onNavigateToCategory?("bakery") }
+                            )
                         }
-                        .padding(.bottom, 120)
+                        .padding(.bottom, 24)
                     }
                     .background(Color(uiColor: .systemGroupedBackground))
                     
@@ -426,85 +418,7 @@ struct DeliveryTrackingDetailSheet: View {
     }
 }
 
-// MARK: - Weather Insights Callout View
-
-struct WeatherInsightsCalloutView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Image(systemName: "cloud.rain.fill")
-                    .foregroundColor(.blue)
-                    .font(.title3)
-                Text("Siri Weather Adjustments Active")
-                    .font(.subheadline.bold())
-                    .foregroundColor(Theme.textPrimary)
-                Spacer()
-                Text("Monsoon Mode")
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundColor(.blue)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(4)
-            }
-            
-            Text("Severe monsoon rain is increasing transit times by 45 mins. Procurement limits are automatically increased by 15% to build safety buffer.")
-                .font(.caption)
-                .foregroundColor(Theme.textSecondary)
-                .lineSpacing(2)
-        }
-        .padding()
-        .background(Color.blue.opacity(0.04))
-        .cornerRadius(Theme.radiusMd)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.radiusMd)
-                .stroke(Color.blue.opacity(0.15), lineWidth: 1)
-        )
-        .padding(.horizontal)
-    }
-}
-
-// MARK: - Popular Product Card
-
-struct PopularProductCard: View {
-    let product: Product
-    @Environment(CartViewModel.self) private var cartViewModel
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(product.name)
-                .font(.subheadline.bold())
-                .foregroundColor(Theme.textPrimary)
-                .lineLimit(1)
-            
-            Text(product.weight)
-                .font(.caption2)
-                .foregroundColor(Theme.textMuted)
-            
-            HStack {
-                Text(product.formattedPrice)
-                    .font(.subheadline.bold())
-                    .foregroundColor(Theme.textPrimary)
-                
-                Spacer()
-                
-                Button {
-                    let qty = cartViewModel.quantity(for: product)
-                    cartViewModel.updateQuantity(for: product, quantity: qty + 1)
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(Theme.primary)
-                }
-            }
-        }
-        .padding()
-        .frame(width: 150)
-        .background(Color(uiColor: .systemBackground))
-        .cornerRadius(Theme.radiusMd)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.radiusMd)
-                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
-        )
-    }
+#Preview {
+    HomeView()
+        .environment(CartViewModel())
 }
