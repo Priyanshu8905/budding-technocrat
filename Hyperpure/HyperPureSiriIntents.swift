@@ -7,6 +7,44 @@ import SwiftUI
 import SwiftData
 
 struct ProductEntity: AppEntity, Identifiable {
+
+    static func mapVoiceQueryToCatalogProduct(_ query: String) -> Product? {
+        let cleanQuery = query.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let mapping: [String: String] = [
+            "chicken": "chicken",
+            "egg": "eggs",
+            "milk": "milkmaid",
+            "flour": "sheets",
+            "atta": "sheets",
+            "wheat": "sheets",
+            "onion": "patty",
+            "tomato": "mayonnaise",
+            "ketchup": "mayonnaise",
+            "sauce": "mayonnaise",
+            "patty": "patty",
+            "paneer": "paneer",
+            "fries": "fries",
+            "potato": "fries",
+            "pasta": "pasta",
+            "crumbs": "crumbs",
+            "straw": "straws",
+            "napkin": "napkin",
+            "serviette": "serviettes",
+            "chocolate": "chocolate"
+        ]
+        
+        for (keyword, catalogKeyword) in mapping {
+            if cleanQuery.contains(keyword) {
+                return MockProducts.products.first(where: { $0.name.lowercased().contains(catalogKeyword) })
+            }
+        }
+        
+        return MockProducts.products.first(where: { 
+            $0.name.lowercased().contains(cleanQuery) || 
+            cleanQuery.contains($0.name.lowercased()) 
+        })
+    }
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Hyperpure product"
     static var defaultQuery = ProductEntityQuery()
 
@@ -400,6 +438,46 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
             shortTitle: "Audit low stock",
             systemImageName: "exclamationmark.triangle.fill"
         )
+
+        AppShortcut(
+            intent: AddBulkItemsToCartVoiceIntent(),
+            phrases: [
+                "Add item list inside \(.applicationName)"
+            ],
+            shortTitle: "Voice bulk cart",
+            systemImageName: "cart.badge.plus"
+        )
+
+        AppShortcut(
+            intent: AddToPantryInventoryVoiceIntent(),
+            phrases: [
+                "Log these ingredients using \(.applicationName)",
+                "Update kitchen stock levels in \(.applicationName)"
+            ],
+            shortTitle: "Add pantry item",
+            systemImageName: "plus.square.on.square"
+        )
+
+        AppShortcut(
+            intent: NavigateToKitchenDashboardIntent(),
+            phrases: [
+                "Examine layout records inside \(.applicationName)",
+                "Show my active pantry logs in \(.applicationName)"
+            ],
+            shortTitle: "Show kitchen dashboard",
+            systemImageName: "chart.bar.doc.horizontal"
+        )
+
+        AppShortcut(
+            intent: ExecuteVoiceProcurementIntent(),
+            phrases: [
+                "Process my kitchen order inside \(.applicationName)",
+                "Run voice procurement using \(.applicationName)",
+                "Restock ingredients via \(.applicationName)"
+            ],
+            shortTitle: "Voice procurement",
+            systemImageName: "chefhat"
+        )
     }
 }
 
@@ -468,6 +546,110 @@ struct AuditLowStockPantryIntent: AppIntent {
     }
 }
 
+struct AddBulkItemsToCartVoiceIntent: AppIntent {
+    static var title: LocalizedStringResource = "Add bulk items to cart by voice"
+    static var description = IntentDescription("Log multiple items directly into your checkout cart using voice command parsing.")
+    
+    @Parameter(title: "Items List")
+    var itemsList: [String]
+    
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        var successfullyAdded: [String] = []
+        
+        func parseItem(_ itemString: String) -> (quantity: Int, name: String) {
+            let clean = itemString.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let pattern = "^(\\d+)\\s*(?:kg|g|liters|l|packs|units|pcs)?\\s+(.+)$"
+            if let regex = try? NSRegularExpression(pattern: pattern),
+               let match = regex.firstMatch(in: clean, range: NSRange(clean.startIndex..., in: clean)) {
+                if let qtyRange = Range(match.range(at: 1), in: clean),
+                   let nameRange = Range(match.range(at: 2), in: clean),
+                   let qty = Int(clean[qtyRange]) {
+                    return (qty, String(clean[nameRange]).capitalized)
+                }
+            }
+            return (1, clean.capitalized)
+        }
+        
+        for rawItem in itemsList {
+            let (qty, parsedName) = parseItem(rawItem)
+            
+            if let product = ProductEntity.mapVoiceQueryToCatalogProduct(parsedName) {
+                let currentQty = CartViewModel.shared.quantity(for: product)
+                CartViewModel.shared.updateQuantity(for: product, quantity: currentQty + qty)
+                successfullyAdded.append("\(qty)x \(product.name)")
+            }
+        }
+        
+        let dialog: IntentDialog
+        if successfullyAdded.isEmpty {
+            dialog = IntentDialog("I couldn't find matches in the catalogue. Try calling out products like Fries, Eggs, or Chicken.")
+        } else {
+            let listString = successfullyAdded.joined(separator: ", ")
+            dialog = IntentDialog("Got it! I've added \(listString) to your cart. The current total is ₹\(CartViewModel.shared.grandTotal).")
+        }
+        
+        return .result(
+            dialog: dialog,
+            view: BulkCartSnippetView(addedItems: successfullyAdded, totalItemsCount: itemsList.count)
+        )
+    }
+}
+
+struct AddToPantryInventoryVoiceIntent: AppIntent {
+    static var title: LocalizedStringResource = "Add to pantry inventory by voice"
+    static var description = IntentDescription("Log raw kitchen ingredients into inventory database hands-free.")
+    
+    @Parameter(title: "Ingredient Name", requestValueDialog: IntentDialog("What ingredient are we logging?"))
+    var name: String
+    
+    @Parameter(title: "Quantity Amount", requestValueDialog: IntentDialog("How much of it are we storing?"))
+    var quantity: Double
+    
+    @Parameter(title: "Category Section", requestValueDialog: IntentDialog("And which section should I put it in?"))
+    var category: String
+    
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        let container = try ModelContainer(for: PantryItem.self)
+        let context = ModelContext(container)
+        
+        let normalizedCategory = category.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        
+        let newItem = PantryItem(
+            name: name.capitalized,
+            category: normalizedCategory,
+            currentQuantity: quantity,
+            unit: "units",
+            purchasedDate: Date(),
+            dailyDepletionRate: quantity / 10.0,
+            shelfLifeDays: 7
+        )
+        
+        context.insert(newItem)
+        try context.save()
+        
+        let dialog = IntentDialog("All set! Stored \(String(format: "%.1f", quantity)) units of \(name.capitalized) in the pantry.")
+        
+        return .result(
+            dialog: dialog,
+            view: PantryConfirmationSnippetView(name: name.capitalized, quantity: quantity, category: normalizedCategory)
+        )
+    }
+}
+
+struct NavigateToKitchenDashboardIntent: AppIntent {
+    static var title: LocalizedStringResource = "Navigate to kitchen dashboard"
+    static var description = IntentDescription("Open the pantry inventory logs in Hyperpure.")
+    static var openAppWhenRun: Bool = true
+    
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        AppState.shared.selectedTab = 4
+        return .result()
+    }
+}
+
 struct PantryAuditSnippetView: View {
     let criticalItems: [PantryItem]
     
@@ -521,6 +703,114 @@ struct PantryAuditSnippetView: View {
     }
 }
 
+struct BulkCartSnippetView: View {
+    let addedItems: [String]
+    let totalItemsCount: Int
+    @State private var cartViewModel = CartViewModel.shared
+    
+    private let layoutPadding: CGFloat = 20
+    private let strokeOpacity: Double = 0.25
+    private let strokeWidth: CGFloat = 1
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Bulk Cart Intake", systemImage: "cart.badge.plus")
+                .font(.headline)
+                .foregroundStyle(Theme.primary)
+
+            if addedItems.isEmpty {
+                Text("No matching catalog items could be parsed from your voice input.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+            } else {
+                Text("Parsed and added \(addedItems.count) of \(totalItemsCount) items:")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textMuted)
+                
+                ForEach(addedItems, id: \.self) { item in
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(Theme.success)
+                        Text(item)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                    }
+                }
+                
+                Divider()
+                
+                HStack {
+                    Text("New Cart Total:")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                    Spacer()
+                    Text("₹\(cartViewModel.grandTotal)")
+                        .font(.headline)
+                        .foregroundStyle(Theme.primary)
+                }
+            }
+        }
+        .padding(layoutPadding)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous)
+                .strokeBorder(Color.white.opacity(strokeOpacity), lineWidth: strokeWidth)
+        )
+        .padding(.horizontal, 4)
+    }
+}
+
+struct PantryConfirmationSnippetView: View {
+    let name: String
+    let quantity: Double
+    let category: String
+    
+    private let layoutPadding: CGFloat = 20
+    private let strokeOpacity: Double = 0.25
+    private let strokeWidth: CGFloat = 1
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Added to Pantry", systemImage: "checkmark.circle.fill")
+                .font(.headline)
+                .foregroundStyle(Theme.success)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(name)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+                
+                HStack {
+                    Text("Stock quantity:")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                    Spacer()
+                    Text("\(String(format: "%.1f", quantity)) units")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                }
+                
+                HStack {
+                    Text("Storage section:")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                    Spacer()
+                    Text(category.capitalized)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.primary)
+                }
+            }
+        }
+        .padding(layoutPadding)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous)
+                .strokeBorder(Color.white.opacity(strokeOpacity), lineWidth: strokeWidth)
+        )
+        .padding(.horizontal, 4)
+    }
+}
+
 #Preview("Product Search Snippet") {
     ProductSearchSnippetView(products: Array(MockProducts.products.prefix(3)))
 }
@@ -545,4 +835,129 @@ struct PantryAuditSnippetView: View {
 #Preview("Pantry Audit Snippet") {
     let item = PantryItem(name: "Fresh Chicken Breast", category: "chicken-eggs", currentQuantity: 15.0, unit: "kg", purchasedDate: Date(), dailyDepletionRate: 3.5, shelfLifeDays: 5)
     PantryAuditSnippetView(criticalItems: [item])
+}
+
+#Preview("Bulk Cart Snippet") {
+    BulkCartSnippetView(addedItems: ["5x Fresh Chicken Breast", "2x Whole Eggs"], totalItemsCount: 2)
+}
+
+#Preview("Pantry Confirmation Snippet") {
+    PantryConfirmationSnippetView(name: "Mozzarella Cheese", quantity: 5.0, category: "dairy-bread")
+}
+
+struct ExecuteVoiceProcurementIntent: AppIntent {
+    static var title: LocalizedStringResource = "Execute voice procurement recipe auto populate"
+    static var description = IntentDescription("Auto-populate your cart with ingredients based on recipe templates.")
+    
+    @Parameter(title: "Target Recipe Selection")
+    var targetRecipe: String?
+    
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        let activeCartIsEmpty = CartViewModel.shared.items.isEmpty
+        
+        let resolvedRecipe: String
+        if activeCartIsEmpty && targetRecipe == nil {
+            resolvedRecipe = try await $targetRecipe.requestValue(
+                IntentDialog(LocalizedStringResource("Your cart is empty. Which recipe or station setup should we get ready?"))
+            )
+        } else {
+            resolvedRecipe = targetRecipe ?? "Baseline Restock"
+        }
+        
+        let cleanRecipe = resolvedRecipe.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        
+        var itemsToAdd: [(name: String, quantity: Int)] = []
+        if cleanRecipe.contains("pizza") {
+            itemsToAdd = [
+                ("paneer", 5),
+                ("fries", 2),
+                ("mayonnaise", 3)
+            ]
+        } else if cleanRecipe.contains("salad") {
+            itemsToAdd = [
+                ("eggs", 3),
+                ("chicken", 2),
+                ("pasta", 4)
+            ]
+        } else {
+            itemsToAdd = [
+                ("eggs", 2),
+                ("fries", 1)
+            ]
+        }
+        
+        var successfullyAdded: [String] = []
+        for item in itemsToAdd {
+            if let product = ProductEntity.mapVoiceQueryToCatalogProduct(item.name) {
+                let currentQty = CartViewModel.shared.quantity(for: product)
+                CartViewModel.shared.updateQuantity(for: product, quantity: currentQty + item.quantity)
+                successfullyAdded.append("\(item.quantity)x \(product.name)")
+            }
+        }
+        
+        let dialog = IntentDialog(
+            LocalizedStringResource("Done! Sourced the ingredients for \(resolvedRecipe). Your cart total is now ₹\(CartViewModel.shared.grandTotal).")
+        )
+        
+        return .result(
+            dialog: dialog,
+            view: RecipeProcurementSnippetView(recipeName: resolvedRecipe.capitalized, addedItems: successfullyAdded)
+        )
+    }
+}
+
+struct RecipeProcurementSnippetView: View {
+    let recipeName: String
+    let addedItems: [String]
+    @State private var cartViewModel = CartViewModel.shared
+    
+    private let layoutPadding: CGFloat = 20
+    private let strokeOpacity: Double = 0.25
+    private let strokeWidth: CGFloat = 1
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(LocalizedStringResource("Recipe Sourcing: \(recipeName)"), systemImage: "chefhat")
+                .font(.headline)
+                .foregroundStyle(Theme.primary)
+
+            Text(LocalizedStringResource("Added recipe ingredients to cart:"))
+                .font(.caption)
+                .foregroundStyle(Theme.textMuted)
+            
+            ForEach(addedItems, id: \.self) { item in
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(Theme.success)
+                    Text(item)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                }
+            }
+            
+            Divider()
+            
+            HStack {
+                Text(LocalizedStringResource("Procurement Subtotal:"))
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Text("₹\(cartViewModel.grandTotal)")
+                    .font(.headline)
+                    .foregroundStyle(Theme.primary)
+            }
+        }
+        .padding(layoutPadding)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous)
+                .strokeBorder(Color.white.opacity(strokeOpacity), lineWidth: strokeWidth)
+        )
+        .padding(.horizontal, 4)
+    }
+}
+
+#Preview("Recipe Procurement Snippet") {
+    RecipeProcurementSnippetView(recipeName: "Pizza Prep", addedItems: ["5x Whole Wheat Atta", "2x Tomato Ketchup"])
 }

@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @State private var selectedTab = 0
+    @Bindable private var appState = AppState.shared
     @State private var isSmartListsPresented = false
     @State private var isCartPresented = false
     @Environment(CartViewModel.self) private var cartViewModel
     
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: $appState.selectedTab) {
             HomeView(
                 onNavigateToCategory: { categoryId in
                     // Navigate action
@@ -26,7 +26,7 @@ struct MainTabView: View {
             
             MyListView(
                 onStartShopping: {
-                    selectedTab = 0
+                    appState.selectedTab = 0
                 },
                 onOpenCart: {
                     isCartPresented = true
@@ -40,7 +40,7 @@ struct MainTabView: View {
             
             OrdersView(
                 onStartShopping: {
-                    selectedTab = 0
+                    appState.selectedTab = 0
                 }
             )
             .tabItem {

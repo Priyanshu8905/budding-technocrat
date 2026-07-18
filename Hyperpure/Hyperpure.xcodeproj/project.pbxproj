@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF1D7A177A634AB6ACA50BFE /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFA050FB0F934D41B3C41502 /* AppState.swift */; };
 		0381C5676EFC480585F3F5DF /* OrdersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E76823D6073645718E38CBCB /* OrdersView.swift */; };
 		04CC63CD6AC44218A79DF2DC /* MyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF78981F79A4F85918D8006 /* MyListView.swift */; };
 		0977C340E30F4F41BA7874D5 /* StatsCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC6D492219D4C1390D64555 /* StatsCounterView.swift */; };
@@ -59,6 +60,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CFA050FB0F934D41B3C41502 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = Hyperpure/Models/AppState.swift; sourceTree = "<group>"; };
 		02ACD95B52AC401DB81D0338 /* ContentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentModels.swift; path = Hyperpure/Models/ContentModels.swift; sourceTree = "<group>"; };
 		064707CAB3BA4825B5C9364F /* MockProducts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MockProducts.swift; path = Hyperpure/Data/MockProducts.swift; sourceTree = "<group>"; };
 		08EF78AA484041CDB11F16C3 /* HeroBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeroBannerView.swift; path = Hyperpure/Views/Home/HeroBannerView.swift; sourceTree = "<group>"; };
@@ -270,6 +272,7 @@
 		D8171C5B05A14D13A625D7C3 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				CFA050FB0F934D41B3C41502 /* AppState.swift */,
 				B2E94EC54DE745D4A4A0E1E5 /* PantryAIProcessor.swift */,
 				B450837C2A9D4E008DBD5556 /* PantryItem.swift */,
 				D8171C5B05A14D13A625D701 /* WeatherModels.swift */,
@@ -356,6 +359,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF1D7A177A634AB6ACA50BFE /* AppState.swift in Sources */,
 				57F8B66BD99143D8A4CA792C /* PantryItem.swift in Sources */,
 				C0723937300BBBC4006722AC /* HyperPureSiriIntents.swift in Sources */,
 				4099FA38AFDD40B580384C5D /* PantryAIProcessor.swift in Sources */,
