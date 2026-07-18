@@ -1,3 +1,6 @@
+// OfferBannerView.swift
+// View displaying promotional banners and wholesale deals.
+
 import SwiftUI
 
 struct OfferCardItem: Identifiable {
@@ -44,4 +47,8 @@ struct OfferBannerView: View {
             }
         }
     }
+}
+
+#Preview {
+    OfferBannerView()
 }

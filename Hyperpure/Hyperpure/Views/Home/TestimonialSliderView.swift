@@ -1,3 +1,6 @@
+// TestimonialSliderView.swift
+// Carousel showing feedback and reviews from restaurant partners.
+
 import SwiftUI
 
 struct TestimonialSliderView: View {
@@ -58,4 +61,8 @@ struct TestimonialSliderView: View {
             .frame(height: 175)
         }
     }
+}
+
+#Preview {
+    TestimonialSliderView(testimonials: MockContent.testimonials)
 }

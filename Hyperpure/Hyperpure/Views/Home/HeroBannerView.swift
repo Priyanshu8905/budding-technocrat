@@ -1,3 +1,6 @@
+// HeroBannerView.swift
+// Image and text carousel highlighting platform features.
+
 import SwiftUI
 
 struct HeroBannerSlide: Identifiable {
@@ -72,4 +75,8 @@ struct HeroBannerView: View {
             }
         }
     }
+}
+
+#Preview {
+    HeroBannerView()
 }

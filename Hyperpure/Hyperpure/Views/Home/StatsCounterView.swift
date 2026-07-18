@@ -1,3 +1,6 @@
+// StatsCounterView.swift
+// Grid showing key platform statistics and metrics.
+
 import SwiftUI
 
 struct StatsCounterView: View {
@@ -26,4 +29,8 @@ struct StatsCounterView: View {
             }
         }
     }
+}
+
+#Preview {
+    StatsCounterView(stats: MockContent.stats)
 }
