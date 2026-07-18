@@ -100,10 +100,20 @@ struct ProductCardView: View {
             .padding(.bottom, 8)
         }
         .padding(6)
-        .hyperpureCardStyle()
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radiusMd)
+                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+        )
     }
     
     private func categoryEmoji(for categoryId: String) -> String {
         MockCategories.categories.first(where: { $0.id == categoryId })?.icon ?? "📦"
     }
+}
+
+#Preview {
+    ProductCardView(product: MockProducts.products[0])
+        .environment(CartViewModel())
 }
