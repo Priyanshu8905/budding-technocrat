@@ -411,19 +411,6 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
             systemImageName: "cart.fill"
         )
 
-        AppShortcut(
-            intent: ApplyMonsoonAdjustmentsIntent(),
-            phrases: [
-                "Apply monsoon adjustments on \(.applicationName)",
-                "Apply monsoon cart adjustments on \(.applicationName)",
-                "Buffer cart for monsoon on \(.applicationName)",
-                "Adjust cart for rain on \(.applicationName)",
-                "Monsoon adjustments on \(.applicationName)",
-                "Monsoon buffer on \(.applicationName)"
-            ],
-            shortTitle: "Monsoon adjustments",
-            systemImageName: "cloud.rain.fill"
-        )
 
         AppShortcut(
             intent: AuditLowStockPantryIntent(),
@@ -477,6 +464,28 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Voice procurement",
             systemImageName: "chefhat"
+        )
+
+        AppShortcut(
+            intent: ApplyWeatherOptimizationIntent(),
+            phrases: [
+                "Prepare for the weather today in \(.applicationName)",
+                "Apply seasonal optimization changes using \(.applicationName)",
+                "Check custom menu recommendations inside \(.applicationName)"
+            ],
+            shortTitle: "Weather optimization",
+            systemImageName: "cloud.sun.fill"
+        )
+
+        AppShortcut(
+            intent: InitiateCheckoutWorkflowIntent(),
+            phrases: [
+                "Checkout my cart inside \(.applicationName)",
+                "Start checkout workflow in \(.applicationName)",
+                "Checkout my Hyperpure cart using \(.applicationName)"
+            ],
+            shortTitle: "Checkout cart",
+            systemImageName: "cart.fill"
         )
     }
 }

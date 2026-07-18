@@ -5,7 +5,7 @@ import SwiftUI
 import Charts
 
 struct WeatherIntelligenceView: View {
-    @State private var viewModel = WeatherIntelligenceViewModel()
+    @State private var viewModel = WeatherIntelligenceViewModel.shared
     @Environment(CartViewModel.self) private var cartViewModel
     @Environment(\.dismiss) private var dismiss
     

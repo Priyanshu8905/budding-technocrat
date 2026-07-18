@@ -7,7 +7,10 @@ import Observation
 @Observable
 @MainActor
 final class WeatherIntelligenceViewModel {
+    static let shared = WeatherIntelligenceViewModel()
     var currentState: WeatherState = .normal
+    
+    private init() {}
     
     var temperature: Double {
         switch currentState {

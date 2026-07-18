@@ -271,9 +271,7 @@ struct CartView: View {
                             .padding(14)
                             .cardStyle()
                             
-                            Button {
-                                // Proceed to checkout
-                            } label: {
+                            NavigationLink(destination: CheckoutView()) {
                                 Text("Proceed to Checkout")
                                     .font(.headline.weight(.bold))
                                     .foregroundColor(.white)
@@ -282,6 +280,7 @@ struct CartView: View {
                                     .background(Theme.primary)
                                     .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
                             }
+                            .buttonStyle(.plain)
                         }
                         .padding(16)
                     }
