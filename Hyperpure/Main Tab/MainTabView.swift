@@ -4,7 +4,6 @@ struct MainTabView: View {
     @State private var appState = AppState.shared
     @State private var myListViewModel = MyListViewModel.shared
     @State private var isSmartListsPresented = false
-    @State private var isCartPresented = false
     @State private var isAccountPresented = false
     @State private var selectedCategoryId: String? = nil
     @Environment(CartViewModel.self) private var cartViewModel
@@ -21,7 +20,7 @@ struct MainTabView: View {
                         isSmartListsPresented = true
                     },
                     onOpenCart: {
-                        isCartPresented = true
+                        appState.isCartPresented = true
                     },
                     onOpenAccount: {
                         isAccountPresented = true
@@ -35,7 +34,7 @@ struct MainTabView: View {
                         appState.selectedTab = 0
                     },
                     onOpenCart: {
-                        isCartPresented = true
+                        appState.isCartPresented = true
                     }
                 )
             }
@@ -62,7 +61,7 @@ struct MainTabView: View {
         .sheet(isPresented: $isSmartListsPresented) {
             SmartListsView()
         }
-        .sheet(isPresented: $isCartPresented) {
+        .sheet(isPresented: $appState.isCartPresented) {
             CartView()
         }
         .sheet(isPresented: $isAccountPresented) {

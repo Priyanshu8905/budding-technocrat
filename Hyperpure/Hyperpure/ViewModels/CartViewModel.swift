@@ -68,4 +68,13 @@ final class CartViewModel {
     func clear() {
         items.removeAll()
     }
+    
+    func applyWeatherBuffer() {
+        let weatherVM = WeatherIntelligenceViewModel.shared
+        for index in items.indices {
+            let item = items[index]
+            let optimizedQty = weatherVM.optimizeQuantity(product: item.product, originalQuantity: item.quantity)
+            items[index].quantity = optimizedQty
+        }
+    }
 }

@@ -8,4 +8,5 @@ import SwiftUI
 public class AppState {
     public static let shared = AppState()
     public var selectedTab: Int = 0
+    public var isCartPresented: Bool = false
 }

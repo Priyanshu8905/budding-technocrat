@@ -1,3 +1,7 @@
+// OrderConfirmationView.swift
+// Reads all data from CheckoutManager.shared — no static params needed.
+// Timer persists when screen is dismissed. Cart cleared when order placed.
+
 import SwiftUI
 import ActivityKit
 import MapKit
@@ -6,137 +10,160 @@ import UserNotifications
 struct OrderConfirmationView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(CartViewModel.self) private var cartViewModel
-    
-    let orderID: String
-    let amount: Int
+
     let shouldStartGracePeriod: Bool
-    
-    @State private var secondsRemaining = 30
-    @State private var isLocked = false
-    @State private var timer: Timer?
+
+    @State private var checkoutManager = CheckoutManager.shared
     @State private var showCancelAlert = false
-    
+
+    private var secondsRemaining: Int {
+        if case .gracePeriodActive(let s) = checkoutManager.state { return s }
+        return 0
+    }
+    private var isLocked: Bool {
+        checkoutManager.state == .orderLocked || checkoutManager.state == .dispatched
+    }
+
     var body: some View {
         ZStack {
-            // Elegant premium dark background to match the theme
-            Color(uiColor: .systemGroupedBackground)
-                .ignoresSafeArea()
-            
+            Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
+
             VStack(spacing: 0) {
                 ScrollView {
-                    VStack(spacing: 28) {
-                        // Celebratory checkmark animation header
+                    VStack(spacing: 24) {
+
+                        // Success header
                         VStack(spacing: 16) {
                             ZStack {
                                 Circle()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color.green.opacity(0.15), Color.green.opacity(0.05)],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
+                                    .fill(LinearGradient(colors: [.green.opacity(0.15), .green.opacity(0.04)],
+                                                         startPoint: .topLeading, endPoint: .bottomTrailing))
                                     .frame(width: 130, height: 130)
-                                
                                 Circle()
-                                    .stroke(
-                                        LinearGradient(
-                                            colors: [.green, .green.opacity(0.4)],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        ),
-                                        lineWidth: 4
-                                    )
+                                    .stroke(LinearGradient(colors: [.green, .green.opacity(0.4)],
+                                                           startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 4)
                                     .frame(width: 110, height: 110)
-                                
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 80))
-                                    .foregroundStyle(
-                                        LinearGradient(
-                                            colors: [.green, .emerald],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
+                                    .foregroundStyle(LinearGradient(colors: [.green, .emerald],
+                                                                    startPoint: .topLeading, endPoint: .bottomTrailing))
                             }
                             .padding(.top, 40)
-                            
+
                             VStack(spacing: 6) {
                                 Text("Order Received Successfully!")
-                                    .font(.title2.weight(.bold))
-                                    .foregroundColor(Theme.textPrimary)
-                                
-                                Text("ID: \(orderID)")
-                                    .font(.subheadline.monospaced())
-                                    .foregroundColor(Theme.textMuted)
+                                    .font(.title2.weight(.bold)).foregroundColor(Theme.textPrimary)
+                                Text("ID: \(checkoutManager.orderID)")
+                                    .font(.subheadline.monospaced()).foregroundColor(Theme.textMuted)
                             }
                         }
-                        
-                        // Sourcing delivery coordinates & details card
+
+                        // Dynamic payment badge
+                        HStack(spacing: 8) {
+                            Image(systemName: checkoutManager.paymentType.icon)
+                                .foregroundColor(checkoutManager.paymentType == .cardPayment ? .green : Theme.primary)
+                            Text("Paid via \(checkoutManager.paymentType.displayLabel)")
+                                .font(.subheadline.bold())
+                                .foregroundColor(checkoutManager.paymentType == .cardPayment ? .green : Theme.primary)
+                        }
+                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .background((checkoutManager.paymentType == .cardPayment ? Color.green : Theme.primary).opacity(0.1))
+                        .cornerRadius(30)
+
+                        // Delivery target card
                         VStack(alignment: .leading, spacing: 14) {
                             HStack {
-                                Image(systemName: "box.truck.fill")
-                                    .foregroundColor(Theme.primary)
+                                Image(systemName: "box.truck.fill").foregroundColor(Theme.primary)
                                 Text("DELIVERY TARGET")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Theme.textMuted)
+                                    .font(.caption.bold()).foregroundColor(Theme.textMuted)
                             }
-                            
                             Divider()
-                            
-                            VStack(alignment: .leading, spacing: 6) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text("Kitchen Outpost NCR-08")
-                                    .font(.subheadline.bold())
-                                    .foregroundColor(Theme.textPrimary)
+                                    .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
                                 Text("Connaught Place Block-B, New Delhi")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.textSecondary)
+                                    .font(.caption).foregroundColor(Theme.textSecondary)
+                                Text("Contact: +91 98765 43210")
+                                    .font(.caption).foregroundColor(Theme.textSecondary)
                             }
-                            
                             Divider()
-                            
-                            HStack {
-                                Text("Paid Via")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.textMuted)
-                                Spacer()
-                                Text("Cash on Delivery (COD)")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Theme.textPrimary)
-                            }
-                            
                             HStack {
                                 Text("Total Amount Paid")
-                                    .font(.subheadline)
-                                    .foregroundColor(Theme.textSecondary)
+                                    .font(.subheadline).foregroundColor(Theme.textSecondary)
                                 Spacer()
-                                Text("₹\(amount)")
-                                    .font(.subheadline.bold())
-                                    .foregroundColor(Theme.primary)
+                                Text("₹\(checkoutManager.grandTotal)")
+                                    .font(.subheadline.bold()).foregroundColor(Theme.primary)
                             }
                         }
                         .padding(16)
                         .background(Color(uiColor: .systemBackground))
                         .cornerRadius(Theme.radiusMd)
-                        .shadow(color: Color.black.opacity(0.02), radius: 8, x: 0, y: 4)
                         .padding(.horizontal)
-                        
+
+                        // Order items (real data from CheckoutManager)
+                        if !checkoutManager.purchasedItems.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("ORDER ITEMS (\(checkoutManager.purchasedItems.count))")
+                                    .font(.caption.bold()).foregroundColor(Theme.textMuted)
+                                Divider()
+                                ForEach(checkoutManager.purchasedItems) { item in
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(item.product.name)
+                                                .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
+                                            Text("Qty: \(item.quantity) × ₹\(Int(round(item.product.price)))")
+                                                .font(.caption).foregroundColor(Theme.textSecondary)
+                                        }
+                                        Spacer()
+                                        Text("₹\(item.subtotal)")
+                                            .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
+                                    }
+                                    .padding(.vertical, 2)
+                                }
+                                Divider()
+                                SummaryRow(title: "Subtotal",  value: "₹\(checkoutManager.subtotal)")
+                                SummaryRow(title: "GST (5%)", value: "₹\(checkoutManager.tax)")
+                                SummaryRow(title: "Delivery",  value: checkoutManager.deliveryFee == 0 ? "FREE" : "₹\(checkoutManager.deliveryFee)")
+                            }
+                            .padding(16)
+                            .background(Color(uiColor: .systemBackground))
+                            .cornerRadius(Theme.radiusMd)
+                            .padding(.horizontal)
+                        }
+
+                        // Live dispatch timer (shows only during grace)
+                        if !isLocked {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("DISPATCH ELAPSED")
+                                    .font(.caption.bold()).foregroundColor(Theme.textMuted)
+                                Divider()
+                                HStack(spacing: 8) {
+                                    Image(systemName: "stopwatch.fill").foregroundColor(Theme.primary)
+                                    Text("Time since order placed: ")
+                                        .font(.caption).foregroundColor(Theme.textSecondary)
+                                    // Live elapsed timer using .timer style
+                                    Text(checkoutManager.dispatchedAt, style: .timer)
+                                        .font(.system(.subheadline, design: .monospaced).bold())
+                                        .foregroundColor(Theme.primary)
+                                }
+                            }
+                            .padding(16)
+                            .background(Color(uiColor: .systemBackground))
+                            .cornerRadius(Theme.radiusMd)
+                            .padding(.horizontal)
+                        }
+
+                        // Map shown when locked
                         if isLocked {
                             SourcingMapView()
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                         } else {
-                            // Sourcing pipeline details card
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 10) {
                                 Text("ORDER SPECIFICATIONS")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Theme.textMuted)
-                                
+                                    .font(.caption.bold()).foregroundColor(Theme.textMuted)
                                 Divider()
-                                
-                                Text("Fresh produce and raw ingredients are currently queued at the logistics dispatch queue. Sourcing coordinates frozen for on-device tracking.")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.textSecondary)
-                                    .lineSpacing(4)
+                                Text("Fresh produce and raw ingredients queued at logistics dispatch. Sourcing coordinates frozen for on-device tracking.")
+                                    .font(.caption).foregroundColor(Theme.textSecondary).lineSpacing(4)
                             }
                             .padding(16)
                             .background(Color(uiColor: .systemBackground))
@@ -145,181 +172,167 @@ struct OrderConfirmationView: View {
                             .transition(.opacity)
                         }
                     }
-                    .padding(.bottom, 160) // Extra padding for persistent bottom bar
+                    .padding(.bottom, 160)
                 }
-                
-                // Return Home button (visible only when order is locked)
+
+                // Go to Dashboard — returns to HomeView root
                 if isLocked {
                     VStack {
                         Button {
-                            cartViewModel.clear()
-                            dismiss()
+                            AppState.shared.isCartPresented = false
                         } label: {
-                            Text("Go back to Dashboard")
-                                .font(.headline.bold())
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Theme.primary)
-                                .cornerRadius(Theme.radiusMd)
+                            HStack(spacing: 10) {
+                                Image(systemName: "house.fill").font(.subheadline.bold())
+                                Text("Go to Dashboard").font(.headline.bold())
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity).padding()
+                            .background(Theme.primary).cornerRadius(Theme.radiusMd)
                         }
                         .padding()
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     .background(Color(uiColor: .systemBackground))
                 }
             }
-            
-            // Persistent Bottom Bar
+
+            // Persistent Grace Period Bottom Bar
             if !isLocked {
                 VStack {
                     Spacer()
-                    
                     VStack(spacing: 14) {
-                        // Countdown row
+                        // Countdown ring
                         HStack(spacing: 12) {
                             ZStack {
-                                Circle()
-                                    .stroke(Color.primary.opacity(0.08), lineWidth: 4)
-                                    .frame(width: 32, height: 32)
-                                
+                                Circle().stroke(Color.primary.opacity(0.08), lineWidth: 4).frame(width: 32, height: 32)
                                 Circle()
                                     .trim(from: 0, to: CGFloat(secondsRemaining) / 30.0)
                                     .stroke(Color.red, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                                     .frame(width: 32, height: 32)
                                     .rotationEffect(.degrees(-90))
                                     .animation(.linear(duration: 0.2), value: secondsRemaining)
-                                
                                 Text("\(secondsRemaining)")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundColor(Theme.textPrimary)
                             }
-                            
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Locking order in: 00:\(secondsRemaining, specifier: "%02d")")
-                                    .font(.subheadline.bold())
-                                    .foregroundColor(Theme.textPrimary)
-                                Text("You can modify or abort during this grace period.")
-                                    .font(.caption2)
-                                    .foregroundColor(Theme.textMuted)
+                                Text("Locking in: 00:\(String(format: "%02d", secondsRemaining))")
+                                    .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
+                                Text("Modify or abort during this grace period.")
+                                    .font(.caption2).foregroundColor(Theme.textMuted)
                             }
                             Spacer()
                         }
-                        
-                        // Control buttons row
+
+                        // Action buttons
                         HStack(spacing: 12) {
-                            Button {
-                                timer?.invalidate()
-                                dismiss() // Go back to append items
-                            } label: {
+                            // Add Items — dismiss only, timer keeps running
+                            Button { dismiss() } label: {
                                 HStack(spacing: 6) {
-                                    Image(systemName: "plus")
-                                        .font(.caption.bold())
-                                    Text("Add Items")
-                                        .font(.subheadline.bold())
+                                    Image(systemName: "plus").font(.caption.bold())
+                                    Text("Add Items").font(.subheadline.bold())
                                 }
                                 .foregroundColor(Theme.primary)
-                                .padding(.vertical, 12)
-                                .frame(maxWidth: .infinity)
-                                .background(Theme.primaryBg)
-                                .cornerRadius(10)
-                            }
-                            .buttonStyle(.plain)
-                            
-                            Button {
-                                showCancelAlert = true
-                            } label: {
+                                .padding(.vertical, 12).frame(maxWidth: .infinity)
+                                .background(Theme.primaryBg).cornerRadius(10)
+                            }.buttonStyle(.plain)
+
+                            Button { showCancelAlert = true } label: {
                                 Text("Cancel Order")
-                                    .font(.subheadline.bold())
-                                    .foregroundColor(.white)
-                                    .padding(.vertical, 12)
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.red)
-                                    .cornerRadius(10)
-                            }
-                            .buttonStyle(.plain)
+                                    .font(.subheadline.bold()).foregroundColor(.white)
+                                    .padding(.vertical, 12).frame(maxWidth: .infinity)
+                                    .background(Color.red).cornerRadius(10)
+                            }.buttonStyle(.plain)
                         }
                     }
                     .padding(16)
                     .background(.ultraThinMaterial)
                     .cornerRadius(20)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-                    )
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.primary.opacity(0.1), lineWidth: 1))
+                    .padding(.horizontal).padding(.bottom, 20)
                 }
             }
         }
         .navigationBarHidden(true)
         .onAppear {
             requestNotificationPermission()
-            postLocalNotification(title: "Order Placed Successfully", body: "Your order ID \(orderID) of ₹\(amount) has been received.")
-            if shouldStartGracePeriod {
-                startGraceCountdown()
-            } else {
-                secondsRemaining = 0
-                isLocked = true
-                lockAndLaunchLiveActivity()
+            postLocalNotification(
+                title: "Order Placed Successfully",
+                body: "Order \(checkoutManager.orderID) · ₹\(checkoutManager.grandTotal) received."
+            )
+
+            // If CheckoutManager is idle here (opened directly), kick off grace
+            if shouldStartGracePeriod && checkoutManager.state == .idle {
+                CheckoutManager.shared.startCheckout(
+                    items: cartViewModel.items,
+                    subtotal: cartViewModel.subtotal,
+                    tax: cartViewModel.tax,
+                    deliveryFee: cartViewModel.deliveryFee,
+                    grandTotal: cartViewModel.grandTotal,
+                    paymentType: .cashOnDelivery
+                )
+                cartViewModel.clear()
+            } else if !shouldStartGracePeriod && checkoutManager.state == .idle {
+                CheckoutManager.shared.state = .orderLocked
+                launchLiveActivity()
             }
-        }
-        .onDisappear {
-            timer?.invalidate()
+
+            // Watch for grace → locked transition to fire Live Activity
+            Task {
+                while true {
+                    try? await Task.sleep(for: .seconds(1))
+                    let s = await MainActor.run { CheckoutManager.shared.state }
+                    if s == .orderLocked {
+                        await MainActor.run {
+                            postLocalNotification(title: "Order Finalized", body: "30s grace elapsed. Sourcing pipeline locked.")
+                            launchLiveActivity()
+                            WidgetDataBridge.shared.writeActiveDelivery(
+                                orderID: CheckoutManager.shared.orderID,
+                                statusLabel: "Order Locked & Preparing",
+                                statusIcon: "lock.fill",
+                                progressFraction: 0.2,
+                                subtotal: CheckoutManager.shared.grandTotal,
+                                estimatedArrival: Date().addingTimeInterval(1800),
+                                paymentMethod: CheckoutManager.shared.paymentType.displayLabel
+                            )
+                        }
+                        break
+                    }
+                    if s == .idle { break }
+                }
+            }
         }
         .alert("Abort Order?", isPresented: $showCancelAlert) {
             Button("Yes, Cancel", role: .destructive) {
-                timer?.invalidate()
-                dismiss() // Return to cart
+                // Cancel clears cart and dismisses to home
+                CheckoutManager.shared.cancelCheckout()
+                AppState.shared.isCartPresented = false
             }
             Button("No, Keep Order", role: .cancel) {}
         } message: {
-            Text("Are you sure you want to cancel this order? Your cart items will be preserved.")
+            Text("Are you sure you want to cancel this order?")
         }
     }
-    
-    private func startGraceCountdown() {
-        secondsRemaining = 30
-        isLocked = false
-        
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if secondsRemaining > 1 {
-                withAnimation(.linear(duration: 0.2)) {
-                    secondsRemaining -= 1
-                }
-            } else {
-                timer?.invalidate()
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                    secondsRemaining = 0
-                    isLocked = true
-                }
-                postLocalNotification(title: "Order Finalized", body: "30s grace elapsed. Sourcing pipeline locked in.")
-                lockAndLaunchLiveActivity()
-            }
-        }
-    }
-    
-    private func lockAndLaunchLiveActivity() {
-        // Start ActivityKit Live Activity
-        let attributes = DeliveryTrackingAttributes(orderID: orderID, merchantName: "Hyperpure Wholesale")
-        let initialContentState = DeliveryTrackingAttributes.ContentState(
+
+    private func launchLiveActivity() {
+        let attrs = DeliveryTrackingAttributes(orderID: checkoutManager.orderID, merchantName: "Hyperpure Wholesale")
+        let initState = DeliveryTrackingAttributes.ContentState(
             currentStatus: .placed,
-            estimatedArrival: Date().addingTimeInterval(1800) // 30 mins
+            estimatedArrival: Date().addingTimeInterval(1800),
+            subtotal: checkoutManager.grandTotal,
+            paymentMethod: checkoutManager.paymentType.displayLabel,
+            itemCount: checkoutManager.purchasedItems.count
         )
-        
         do {
             let _ = try Activity<DeliveryTrackingAttributes>.request(
-                attributes: attributes,
-                content: ActivityContent(state: initialContentState, staleDate: nil),
+                attributes: attrs,
+                content: ActivityContent(state: initState, staleDate: nil),
                 pushType: nil
             )
         } catch {
-            print("Failed to start Live Activity: \(error.localizedDescription)")
+            print("Live Activity error: \(error)")
         }
     }
-    
+
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
     }
@@ -330,131 +343,102 @@ public func postLocalNotification(title: String, body: String) {
     content.title = title
     content.body = body
     content.sound = .default
-    
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
-    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+    let request = UNNotificationRequest(
+        identifier: UUID().uuidString,
+        content: content,
+        trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+    )
     UNUserNotificationCenter.current().add(request)
 }
 
-// Visual layout support for green gradient
 extension Color {
     static let emerald = Color(red: 16/255, green: 185/255, blue: 129/255)
 }
 
 struct SourcingMapView: View {
-    // CP coords: CP Center (approx 28.6304, 77.2177)
-    let warehouse = CLLocationCoordinate2D(latitude: 28.6270, longitude: 77.2150) // Sourcing Hub
-    let destination = CLLocationCoordinate2D(latitude: 28.6328, longitude: 77.2195) // Kitchen Outpost
-    
-    @State private var courierPosition: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 28.6270, longitude: 77.2150)
+    let warehouse   = CLLocationCoordinate2D(latitude: 28.6270, longitude: 77.2150)
+    let destination = CLLocationCoordinate2D(latitude: 28.6328, longitude: 77.2195)
+
+    @State private var courierPosition = CLLocationCoordinate2D(latitude: 28.6270, longitude: 77.2150)
     @State private var progress: Double = 0.0
     @State private var timer: Timer?
-    
-    @State private var position: MapCameraPosition = .region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 28.6299, longitude: 77.2172),
-            span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012)
-        )
-    )
-    
     @State private var notifiedSteps: Set<Int> = []
-    
+    @State private var position: MapCameraPosition = .region(
+        MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 28.6299, longitude: 77.2172),
+                           span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012))
+    )
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 HStack(spacing: 6) {
-                    Image(systemName: "map.fill")
-                        .foregroundColor(Theme.primary)
-                    Text("LIVE ROUTING MAP")
-                        .font(.caption.bold())
-                        .foregroundColor(Theme.textMuted)
+                    Image(systemName: "map.fill").foregroundColor(Theme.primary)
+                    Text("LIVE ROUTING MAP").font(.caption.bold()).foregroundColor(Theme.textMuted)
                 }
                 Spacer()
                 Text("\(Int(progress * 100))% En Route")
                     .font(.caption.bold())
                     .foregroundColor(progress >= 1.0 ? .green : Theme.primary)
             }
-            
-            // Modern iOS 17 Map component
+
             Map(position: $position) {
-                Marker("Sourcing Warehouse", systemImage: "building.2.fill", coordinate: warehouse)
-                    .tint(.blue)
-                
-                Marker("Kitchen Outpost (NCR-08)", systemImage: "fork.knife", coordinate: destination)
-                    .tint(Theme.primary)
-                
+                Marker("Sourcing Warehouse", systemImage: "building.2.fill", coordinate: warehouse).tint(.blue)
+                Marker("Kitchen Outpost (NCR-08)", systemImage: "fork.knife", coordinate: destination).tint(Theme.primary)
                 Annotation("Courier", coordinate: courierPosition) {
                     ZStack {
-                        Circle()
-                            .fill(.green)
-                            .frame(width: 32, height: 32)
-                            .shadow(color: .green.opacity(0.6), radius: 6)
-                        
-                        Image(systemName: "shippingbox.fill")
-                            .foregroundColor(.white)
-                            .font(.system(size: 13, weight: .bold))
+                        Circle().fill(.green).frame(width: 32, height: 32).shadow(color: .green.opacity(0.6), radius: 6)
+                        Image(systemName: "shippingbox.fill").foregroundColor(.white).font(.system(size: 13, weight: .bold))
                     }
                 }
             }
             .frame(height: 220)
             .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-            )
-            
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.1), lineWidth: 1))
+
             VStack(alignment: .leading, spacing: 4) {
-                Text(progress >= 1.0 ? "Courier has arrived at your restaurant dock." : "Consignment dispatched. Delivery partner tracking active in real-time.")
-                    .font(.caption.bold())
-                    .foregroundColor(Theme.textPrimary)
+                Text(progress >= 1.0 ? "Courier arrived at your restaurant dock." : "Consignment dispatched. Tracking active in real-time.")
+                    .font(.caption.bold()).foregroundColor(Theme.textPrimary)
                 Text("Delhi-NCR Hub Route: cp-outer-ring-rd")
-                    .font(.system(size: 9).monospaced())
-                    .foregroundColor(Theme.textMuted)
+                    .font(.system(size: 9).monospaced()).foregroundColor(Theme.textMuted)
             }
         }
         .padding(16)
         .background(Color(uiColor: .systemBackground))
         .cornerRadius(Theme.radiusMd)
         .padding(.horizontal)
-        .onAppear {
-            startCourierSimulation()
-        }
-        .onDisappear {
-            timer?.invalidate()
-        }
+        .onAppear { startCourierSimulation() }
+        .onDisappear { timer?.invalidate() }
     }
-    
+
     private func startCourierSimulation() {
-        progress = 0.0
-        courierPosition = warehouse
-        notifiedSteps = []
-        
+        progress = 0.0; courierPosition = warehouse; notifiedSteps = []
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
             if progress < 1.0 {
                 withAnimation(.linear(duration: 1.5)) {
                     progress += 0.05
                     if progress > 1.0 { progress = 1.0 }
-                    
-                    // Linear interpolation
-                    let newLat = warehouse.latitude + (destination.latitude - warehouse.latitude) * progress
-                    let newLon = warehouse.longitude + (destination.longitude - warehouse.longitude) * progress
-                    courierPosition = CLLocationCoordinate2D(latitude: newLat, longitude: newLon)
+                    let lat = warehouse.latitude + (destination.latitude - warehouse.latitude) * progress
+                    let lon = warehouse.longitude + (destination.longitude - warehouse.longitude) * progress
+                    courierPosition = CLLocationCoordinate2D(latitude: lat, longitude: lon)
                 }
-                
-                let percent = Int(round(progress * 100))
-                if percent >= 20 && percent < 60 && !notifiedSteps.contains(20) {
+                let pct = Int(round(progress * 100))
+                if pct >= 20 && pct < 60 && !notifiedSteps.contains(20) {
                     notifiedSteps.insert(20)
-                    postLocalNotification(title: "Courier Assigned", body: "Delivery partner is loading consignment at CP warehouse.")
-                } else if percent >= 60 && percent < 100 && !notifiedSteps.contains(60) {
+                    postLocalNotification(title: "Courier Assigned", body: "Loading consignment at CP warehouse.")
+                    WidgetDataBridge.shared.updateProgress(0.4, statusLabel: "Courier Assigned", statusIcon: "person.fill")
+                } else if pct >= 60 && pct < 100 && !notifiedSteps.contains(60) {
                     notifiedSteps.insert(60)
-                    postLocalNotification(title: "Consignment Dispatched", body: "Logistics partner has departed warehouse hub.")
+                    postLocalNotification(title: "Consignment Dispatched", body: "Logistics partner departed hub.")
+                    WidgetDataBridge.shared.updateProgress(0.7, statusLabel: "Out for Delivery", statusIcon: "shippingbox.fill")
                 }
             } else {
                 timer?.invalidate()
                 if !notifiedSteps.contains(100) {
                     notifiedSteps.insert(100)
-                    postLocalNotification(title: "Courier Arrived", body: "Consignment successfully delivered to your restaurant dock!")
+                    postLocalNotification(title: "Courier Arrived 🎉", body: "Delivered to your restaurant dock!")
+                    CheckoutManager.shared.state = .dispatched
+                    WidgetDataBridge.shared.updateProgress(1.0, statusLabel: "Delivered!", statusIcon: "checkmark.seal.fill")
                 }
             }
         }

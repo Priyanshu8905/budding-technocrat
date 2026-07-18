@@ -41,6 +41,7 @@
 		B325060126E54D6E9C23DFF6 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293831E6BBE642E2BD6B962B /* Product.swift */; };
 		BBF1B0E06DDF426883A95C47 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AC4B2C5C448DD92BCE4E2 /* CartItem.swift */; };
 		BD883CC007DB4B198B44EC2A /* FAQAccordionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C4782FFB02A440BB72CB666 /* FAQAccordionView.swift */; };
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* WidgetDataBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* WidgetDataBridge.swift */; };
 		BF1D7A177A634AB6ACA50BFE /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFA050FB0F934D41B3C41502 /* AppState.swift */; };
 		C0723937300BBBC4006722AC /* HyperPureSiriIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0723936300BBBC4006722AC /* HyperPureSiriIntents.swift */; };
 		C5D5A383FEBB4C2DA7ED1281 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7900CF5E7622499080CC4659 /* SearchBarView.swift */; };
@@ -119,6 +120,7 @@
 		C072399B300C0449006722AC /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
 		C07239AE300C0CD9006722AC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		CE58B64873144B83B528F23B /* CatalogueViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CatalogueViewModel.swift; path = Hyperpure/ViewModels/CatalogueViewModel.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* WidgetDataBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetDataBridge.swift; path = Hyperpure/Models/WidgetDataBridge.swift; sourceTree = "<group>"; };
 		CFA050FB0F934D41B3C41502 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = Hyperpure/Models/AppState.swift; sourceTree = "<group>"; };
 		D1D0C150613442D29D224253 /* MockContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MockContent.swift; path = Hyperpure/Data/MockContent.swift; sourceTree = "<group>"; };
 		D25EBFE6CDFC47E79DA5AB0B /* CheckoutWorkflowIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckoutWorkflowIntents.swift; path = Hyperpure/AppIntents/CheckoutWorkflowIntents.swift; sourceTree = "<group>"; };
@@ -333,6 +335,7 @@
 			isa = PBXGroup;
 			children = (
 				CFA050FB0F934D41B3C41502 /* AppState.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* WidgetDataBridge.swift */,
 				B2E94EC54DE745D4A4A0E1E5 /* PantryAIProcessor.swift */,
 				B450837C2A9D4E008DBD5556 /* PantryItem.swift */,
 				D8171C5B05A14D13A625D701 /* WeatherModels.swift */,
@@ -432,6 +435,7 @@
 				75918CA70D3C4509B6C2B519 /* WeatherIntelligenceWidget.swift in Sources */,
 				A2D743105A5E466FAA138DFE /* WeatherIntelligenceAppIntents.swift in Sources */,
 				BF1D7A177A634AB6ACA50BFE /* AppState.swift in Sources */,
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* WidgetDataBridge.swift in Sources */,
 				57F8B66BD99143D8A4CA792C /* PantryItem.swift in Sources */,
 				C0723937300BBBC4006722AC /* HyperPureSiriIntents.swift in Sources */,
 				4099FA38AFDD40B580384C5D /* PantryAIProcessor.swift in Sources */,

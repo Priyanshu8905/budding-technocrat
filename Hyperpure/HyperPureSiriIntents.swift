@@ -446,13 +446,13 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
         )
 
         AppShortcut(
-            intent: NavigateToKitchenDashboardIntent(),
+            intent: ShowKitchenStatusOnLockScreenIntent(),
             phrases: [
-                "Examine layout records inside \(.applicationName)",
-                "Show my active pantry logs in \(.applicationName)"
+                "Show my kitchen delivery on \(.applicationName)",
+                "Update my lock screen widget in \(.applicationName)"
             ],
-            shortTitle: "Show kitchen dashboard",
-            systemImageName: "chart.bar.doc.horizontal"
+            shortTitle: "Kitchen Lock Screen",
+            systemImageName: "lock.iphone"
         )
 
         AppShortcut(
