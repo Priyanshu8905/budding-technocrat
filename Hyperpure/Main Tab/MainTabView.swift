@@ -1,12 +1,13 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @Bindable private var appState = AppState.shared
+    @State private var appState = AppState.shared
     @State private var isSmartListsPresented = false
     @State private var isCartPresented = false
     @Environment(CartViewModel.self) private var cartViewModel
     
     var body: some View {
+        @Bindable var appState = appState
         TabView(selection: $appState.selectedTab) {
             HomeView(
                 onNavigateToCategory: { categoryId in
