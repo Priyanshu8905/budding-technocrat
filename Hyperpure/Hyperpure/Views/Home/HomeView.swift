@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var searchText: String = ""
+    @State private var weatherViewModel = WeatherIntelligenceViewModel.shared
     @State private var isCategoriesSheetPresented = false
     @Environment(CartViewModel.self) private var cartViewModel
     var onNavigateToCategory: ((String) -> Void)?

@@ -193,19 +193,8 @@ struct CartView: View {
                             .background(Color(uiColor: .secondarySystemGroupedBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             
-                            Button {
-                                OrderManager.shared.placeOrder(
-                                    items: cartViewModel.items,
-                                    subtotal: cartViewModel.subtotal,
-                                    deliveryFee: cartViewModel.deliveryFee,
-                                    tax: cartViewModel.tax,
-                                    grandTotal: cartViewModel.grandTotal,
-                                    deliverySlot: slots[selectedDeliverySlot]
-                                )
-                                cartViewModel.clear()
-                                dismiss()
-                            } label: {
-                                Text("Place Order · ₹\(cartViewModel.grandTotal)")
+                            NavigationLink(destination: CheckoutView()) {
+                                Text("Proceed to Checkout")
                                     .font(.headline.weight(.bold))
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
