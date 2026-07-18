@@ -9,9 +9,20 @@ import WidgetKit
 
 // MARK: - Payment Type
 
-public enum PaymentType: String, Codable {
+public enum PaymentType: String, Codable, AppEnum {
     case cashOnDelivery = "Cash on Delivery"
     case cardPayment    = "Credit Card"
+    
+    public static var typeDisplayRepresentation: TypeDisplayRepresentation {
+        "Payment Method"
+    }
+    
+    public static var caseDisplayRepresentations: [PaymentType: DisplayRepresentation] {
+        [
+            .cashOnDelivery: "Cash on Delivery",
+            .cardPayment: "Credit Card"
+        ]
+    }
     
     var displayLabel: String { rawValue }
     var icon: String {
@@ -34,11 +45,15 @@ public class CheckoutManager {
         case gracePeriodActive(secondsRemaining: Int)
         case orderLocked
         case dispatched
+        case arrived      // "Order Reached" or "Courier Arrived"
+        case completed    // "Order Completed"
     }
 
     public var state: CheckoutState = .idle
     public var orderID: String = ""
+    public var courierProgress: Double = 0.0
     var timerTask: Task<Void, Never>?
+    private var simulationTask: Task<Void, Never>?
 
     // Checkout payload — true data from cart at order time
     var purchasedItems: [CartItem] = []
@@ -67,6 +82,7 @@ public class CheckoutManager {
         self.grandTotal = grandTotal
         self.paymentType = paymentType
         self.dispatchedAt = .now
+        self.courierProgress = 0.0
 
         orderID = "#HP-" + String(Int.random(in: 1000...9999))
         state = .gracePeriodActive(secondsRemaining: 30)
@@ -84,20 +100,29 @@ public class CheckoutManager {
 
     public func cancelCheckout() {
         timerTask?.cancel()
+        simulationTask?.cancel()
         state = .idle
+        courierProgress = 0.0
         CartViewModel.shared.clear()
         WidgetDataBridge.shared.clearDelivery()
+    }
+
+    // MARK: Force Lock order immediately (bypasses grace period)
+    public func forceLockOrder() {
+        timerTask?.cancel()
+        lockOrder()
     }
 
     // MARK: Lock Order & start Live Activity + widget
     private func lockOrder() {
         state = .orderLocked
         dispatchedAt = .now
+        courierProgress = 0.0
 
         // Write widget data to App Group
         WidgetDataBridge.shared.writeActiveDelivery(
             orderID: orderID,
-            statusLabel: "Order Locked & Preparing",
+            statusLabel: "Preparing Order",
             statusIcon: "lock.fill",
             progressFraction: 0.2,
             subtotal: grandTotal,
@@ -121,21 +146,37 @@ public class CheckoutManager {
                 pushType: nil
             )
             postLocalNotification(
-                title: "Order Finalized",
-                body: "Sourcing pipeline locked in. Live tracking active on Lock Screen."
+                title: "Order Sourcing Locked",
+                body: "Consignment \(orderID) locked for dispatch preparation."
             )
         } catch {
             print("Live Activity error: \(error)")
         }
 
-        // Simulate async step progression
-        Task {
-            try? await Task.sleep(for: .seconds(8))
-            await updateDeliveryStep(.partnerAssigned, progress: 0.4)
-            try? await Task.sleep(for: .seconds(8))
-            await updateDeliveryStep(.dispatched, progress: 0.7)
-            try? await Task.sleep(for: .seconds(8))
-            await updateDeliveryStep(.arrived, progress: 1.0)
+        // Run smooth centralized courier progress simulation
+        simulationTask?.cancel()
+        simulationTask = Task {
+            // progress: 0.0 -> 1.0 (updates by 0.02 every 0.6 seconds, takes 30 seconds total)
+            for _ in 1...50 {
+                try? await Task.sleep(for: .milliseconds(600))
+                if Task.isCancelled { return }
+                
+                self.courierProgress += 0.02
+                if self.courierProgress > 1.0 { self.courierProgress = 1.0 }
+                
+                // Map progress to steps
+                let progress = self.courierProgress
+                if progress >= 1.0 {
+                    await updateDeliveryStep(.completed, progress: 1.0)
+                    break
+                } else if progress >= 0.85 {
+                    await updateDeliveryStep(.arrived, progress: 0.9)
+                } else if progress >= 0.55 {
+                    await updateDeliveryStep(.dispatched, progress: 0.7)
+                } else if progress >= 0.25 {
+                    await updateDeliveryStep(.partnerAssigned, progress: 0.4)
+                }
+            }
         }
     }
 
@@ -143,12 +184,43 @@ public class CheckoutManager {
         guard let activity = Activity<DeliveryTrackingAttributes>.activities
             .first(where: { $0.attributes.orderID == self.orderID }) else { return }
 
-        let isArrived = step == .arrived
-        if isArrived { self.state = .dispatched }
+        // Update the app state machine matching the steps
+        switch step {
+        case .placed:
+            self.state = .orderLocked
+        case .partnerAssigned:
+            self.state = .orderLocked
+        case .dispatched:
+            self.state = .dispatched
+        case .arrived:
+            if self.state != .arrived {
+                self.state = .arrived
+                postLocalNotification(title: "Courier Arrived 🎉", body: "Consignment reached Connaught Place dock.")
+            }
+        case .completed:
+            if self.state != .completed {
+                self.state = .completed
+                postLocalNotification(title: "Order Completed! 📦", body: "Receipt saved to history.")
+                
+                // Save order to OrderManager.shared history
+                let newOrder = Order(
+                    id: self.orderID,
+                    items: self.purchasedItems,
+                    subtotal: self.subtotal,
+                    deliveryFee: self.deliveryFee,
+                    tax: self.tax,
+                    grandTotal: self.grandTotal,
+                    deliverySlot: "Today, Sourcing Pipeline",
+                    placedAt: self.dispatchedAt,
+                    status: .confirmed
+                )
+                OrderManager.shared.orders.append(newOrder)
+            }
+        }
 
         let updatedState = DeliveryTrackingAttributes.ContentState(
             currentStatus: step,
-            estimatedArrival: isArrived ? Date() : Date().addingTimeInterval(900),
+            estimatedArrival: step == .completed ? Date() : Date().addingTimeInterval(900),
             subtotal: grandTotal,
             paymentMethod: paymentType.displayLabel,
             itemCount: purchasedItems.count
@@ -161,7 +233,8 @@ public class CheckoutManager {
         switch step {
         case .partnerAssigned: label = "Courier Assigned"; icon = "person.fill"
         case .dispatched:      label = "Out for Delivery"; icon = "shippingbox.fill"
-        case .arrived:         label = "Delivered!";       icon = "checkmark.seal.fill"
+        case .arrived:         label = "Order Reached";    icon = "house.fill"
+        case .completed:       label = "Order Completed";  icon = "checkmark.seal.fill"
         default:               label = "Preparing";        icon = "clock.fill"
         }
         await MainActor.run {
@@ -171,11 +244,9 @@ public class CheckoutManager {
         // Milestone notifications
         switch step {
         case .partnerAssigned:
-            postLocalNotification(title: "Courier Assigned", body: "Delivery partner loading at CP warehouse.")
+            postLocalNotification(title: "Courier Assigned", body: "Delivery partner loading cargo at CP hub.")
         case .dispatched:
-            postLocalNotification(title: "Consignment Dispatched", body: "Logistics partner departed hub.")
-        case .arrived:
-            postLocalNotification(title: "Courier Arrived 🎉", body: "Consignment delivered to your restaurant dock!")
+            postLocalNotification(title: "Consignment Dispatched", body: "Logistics partner departed CP warehouse.")
         default: break
         }
     }
@@ -202,18 +273,32 @@ struct PlaceProcurementOrderIntent: AppIntent {
     static var openAppWhenRun: Bool = false
     init() {}
 
+    @Parameter(title: "Payment Method", default: .cashOnDelivery)
+    var paymentMethod: PaymentType
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Place my kitchen order using \(\.$paymentMethod)")
+    }
+
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
         let cart = CartViewModel.shared
+        if cart.items.isEmpty {
+            return .result(dialog: IntentDialog("Your cart is empty. Please add items to your cart first before placing a procurement order."))
+        }
+
         CheckoutManager.shared.startCheckout(
             items: cart.items,
             subtotal: cart.subtotal,
             tax: cart.tax,
             deliveryFee: cart.deliveryFee,
             grandTotal: cart.grandTotal,
-            paymentType: .cashOnDelivery
+            paymentType: paymentMethod
         )
-        let dialog = IntentDialog("Order received. Starting your thirty-second modification grace window. You can cancel or edit items before dispatch logs freeze.")
+        // Auto-clear cart since order is placed
+        cart.clear()
+
+        let dialog = IntentDialog("Order received via \(paymentMethod.displayLabel). Starting your thirty-second modification grace window. You can cancel or edit items before dispatch logs freeze.")
         return .result(dialog: dialog, view: CheckoutGracePeriodSnippetView())
     }
 }
@@ -225,33 +310,75 @@ struct CancelCheckoutIntent: AppIntent {
     init() {}
 
     @MainActor
-    func perform() async throws -> some IntentResult {
-        CheckoutManager.shared.cancelCheckout()
-        return .result()
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let mgr = CheckoutManager.shared
+        let isCard = mgr.paymentType == .cardPayment
+        let refundAmount = mgr.grandTotal
+        
+        mgr.cancelCheckout()
+        
+        let dialogText: String
+        if isCard {
+            dialogText = "Your credit card order has been cancelled, and a refund of \(refundAmount) rupees has been initiated to your account."
+        } else {
+            dialogText = "Your cash on delivery order has been cancelled successfully."
+        }
+        
+        return .result(dialog: IntentDialog("\(dialogText)"))
     }
 }
 
-struct ShowKitchenStatusOnLockScreenIntent: AppIntent {
-    static var title: LocalizedStringResource = "Show Kitchen Status"
-    static var description = IntentDescription("Updates the Lock Screen widget with the latest kitchen delivery data.")
+struct ConfirmKitchenOrderIntent: AppIntent {
+    static var title: LocalizedStringResource = "Confirm Kitchen Order"
+    static var description = IntentDescription("Instantly locks the active checkout, bypassing the remaining grace seconds.")
     static var openAppWhenRun: Bool = false
     init() {}
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let mgr = CheckoutManager.shared
-
-        // Force a widget timeline reload to surface current data
-        WidgetCenter.shared.reloadAllTimelines()
-
-        let isActive = mgr.state != .idle
-        let dialog: IntentDialog
-        if isActive {
-            dialog = IntentDialog("Your kitchen delivery widget is now updated on your Lock Screen. Order \(mgr.orderID) status: \(mgr.state == .dispatched ? "Out for Delivery" : "Preparing"). Check your Lock Screen for the live ETA countdown.")
-        } else {
-            dialog = IntentDialog("No active kitchen delivery right now. Place an order first and your Lock Screen widget will automatically track it in real time.")
+        if mgr.state == .idle {
+            return .result(dialog: IntentDialog("You don't have an active checkout to lock right now."))
         }
-        return .result(dialog: dialog)
+        
+        mgr.forceLockOrder()
+        let dialogText = "Your order \(mgr.orderID) is now locked immediately. Sourcing logistics initiated."
+        return .result(dialog: IntentDialog("\(dialogText)"))
+    }
+}
+
+struct CheckActiveDeliveryStatusIntent: AppIntent {
+    static var title: LocalizedStringResource = "Check Kitchen Delivery Status"
+    static var description = IntentDescription("Returns the real-time progress and milestone of your active kitchen delivery.")
+    static var openAppWhenRun: Bool = false
+    init() {}
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        let mgr = CheckoutManager.shared
+        
+        if mgr.state == .idle {
+            let dialog = IntentDialog("You don't have any active kitchen delivery right now. Place an order to start tracking.")
+            return .result(dialog: dialog, view: EmptyDeliverySnippetView())
+        }
+
+        let dialogText: String
+        switch mgr.state {
+        case .gracePeriodActive(let secs):
+            dialogText = "Your order is in the modification grace window. Sourcing logs will freeze in \(secs) seconds."
+        case .orderLocked:
+            dialogText = "Your order is locked and preparing. Sourcing warehouse is loading your cargo."
+        case .dispatched:
+            dialogText = "Your consignment is out for delivery. Courier is en route via Connaught Place outer ring road."
+        case .arrived:
+            dialogText = "Your courier has arrived at your restaurant dock!"
+        case .completed:
+            dialogText = "Your order is completed. Cargo has been successfully delivered and checked in."
+        case .idle:
+            dialogText = "No active delivery."
+        }
+
+        return .result(dialog: IntentDialog("\(dialogText)"), view: SiriActiveDeliverySnippetView())
     }
 }
 
@@ -342,8 +469,14 @@ struct CheckoutGracePeriodSnippetView: View {
                             .font(.system(.title3, design: .rounded).weight(.bold))
                             .foregroundColor(Theme.textPrimary)
                     }
-                    Text("Locking order in: 00:\(String(format: "%02d", seconds))")
-                        .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
+                    
+                    VStack(spacing: 4) {
+                        Text("Locking order in: 00:\(String(format: "%02d", seconds))")
+                            .font(.subheadline.bold()).foregroundColor(Theme.textPrimary)
+                        Text(checkoutManager.paymentType == .cardPayment ? "Paid via Credit Card" : "Payment Mode: Cash on Delivery")
+                            .font(.caption).foregroundColor(Theme.textMuted)
+                    }
+
                     HStack(spacing: 10) {
                         Button(intent: CancelCheckoutIntent()) {
                             Text("Cancel Order")
@@ -372,6 +505,18 @@ struct CheckoutGracePeriodSnippetView: View {
                     Image(systemName: "shippingbox.fill").font(.title).foregroundColor(Theme.primary)
                     Text("Consignment Dispatched").font(.headline).foregroundColor(Theme.textPrimary)
                 }
+            
+            case .arrived:
+                VStack(spacing: 10) {
+                    Image(systemName: "house.fill").font(.title).foregroundColor(.green)
+                    Text("Courier Arrived").font(.headline).foregroundColor(Theme.textPrimary)
+                }
+            
+            case .completed:
+                VStack(spacing: 10) {
+                    Image(systemName: "checkmark.seal.fill").font(.title).foregroundColor(.green)
+                    Text("Order Completed").font(.headline).foregroundColor(Theme.textPrimary)
+                }
 
             case .idle:
                 Text("No active checkout session.").font(.caption).foregroundColor(Theme.textMuted)
@@ -380,5 +525,79 @@ struct CheckoutGracePeriodSnippetView: View {
         .padding(16)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.primary.opacity(0.1), lineWidth: 1))
+    }
+}
+
+struct EmptyDeliverySnippetView: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "box.truck").font(.largeTitle).foregroundColor(Theme.textMuted)
+            Text("No Active Delivery").font(.headline).foregroundColor(Theme.textPrimary)
+            Text("Your active and past orders will show up here.").font(.caption).foregroundColor(Theme.textSecondary)
+        }
+        .padding(16)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+        .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.primary.opacity(0.1), lineWidth: 1))
+    }
+}
+
+struct SiriActiveDeliverySnippetView: View {
+    @State private var mgr = CheckoutManager.shared
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("ORDER STATUS")
+                    .font(.system(.caption, design: .rounded).weight(.heavy))
+                    .foregroundColor(Theme.primary)
+                Spacer()
+                Text(mgr.orderID)
+                    .font(.system(.caption, design: .monospaced).bold())
+                    .foregroundColor(Theme.textSecondary)
+            }
+            Divider().background(Color.primary.opacity(0.1))
+
+            // Progress bar
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.primary.opacity(0.06)).frame(height: 8)
+                    Capsule()
+                        .fill(mgr.state == .arrived || mgr.state == .completed ? Color.green : Theme.primary)
+                        .frame(width: geo.size.width * CGFloat(mgr.courierProgress), height: 8)
+                        .animation(.spring(), value: mgr.courierProgress)
+                }
+            }
+            .frame(height: 8)
+
+            HStack {
+                Text(statusText(for: mgr.state))
+                    .font(.subheadline.bold())
+                    .foregroundColor(Theme.textPrimary)
+                Spacer()
+                Text("₹\(mgr.grandTotal) · \(mgr.paymentType.displayLabel)")
+                    .font(.caption)
+                    .foregroundColor(Theme.textMuted)
+            }
+
+            if case .gracePeriodActive(let secs) = mgr.state {
+                Text("Sourcing logs lock in \(secs)s")
+                    .font(.caption2.bold())
+                    .foregroundColor(.red)
+            }
+        }
+        .padding(16)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+        .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.primary.opacity(0.1), lineWidth: 1))
+    }
+
+    private func statusText(for state: CheckoutManager.CheckoutState) -> String {
+        switch state {
+        case .gracePeriodActive: return "Grace Window Active"
+        case .orderLocked:       return "Order Preparing"
+        case .dispatched:        return "Out for Delivery"
+        case .arrived:           return "Order Reached"
+        case .completed:         return "Order Completed"
+        case .idle:              return "Idle"
+        }
     }
 }

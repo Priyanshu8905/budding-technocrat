@@ -11,6 +11,7 @@ public enum DeliveryStep: String, Codable, Hashable {
     case partnerAssigned
     case dispatched
     case arrived
+    case completed
 }
 
 // MARK: - Dynamic Attributes (static metadata + live ContentState)
@@ -105,6 +106,7 @@ struct DeliveryTrackingLiveActivity: Widget {
         case .partnerAssigned: return "Courier Ready"
         case .dispatched:      return "Out for Delivery"
         case .arrived:         return "Arrived at Kitchen"
+        case .completed:       return "Order Completed"
         }
     }
 }
@@ -136,11 +138,17 @@ struct DeliveryTrackingLockScreenView: View {
             HStack(spacing: 8) {
                 progressNode(title: "Placed", active: true)
                 progressLine(active: context.state.currentStatus != .placed)
-                progressNode(title: "Assigned", active: context.state.currentStatus == .partnerAssigned || context.state.currentStatus == .dispatched || context.state.currentStatus == .arrived)
-                progressLine(active: context.state.currentStatus == .dispatched || context.state.currentStatus == .arrived)
-                progressNode(title: "Dispatched", active: context.state.currentStatus == .dispatched || context.state.currentStatus == .arrived)
-                progressLine(active: context.state.currentStatus == .arrived)
-                progressNode(title: "Arrived", active: context.state.currentStatus == .arrived)
+                
+                progressNode(title: "Assigned", active: context.state.currentStatus == .partnerAssigned || context.state.currentStatus == .dispatched || context.state.currentStatus == .arrived || context.state.currentStatus == .completed)
+                progressLine(active: context.state.currentStatus == .dispatched || context.state.currentStatus == .arrived || context.state.currentStatus == .completed)
+                
+                progressNode(title: "Transit", active: context.state.currentStatus == .dispatched || context.state.currentStatus == .arrived || context.state.currentStatus == .completed)
+                progressLine(active: context.state.currentStatus == .arrived || context.state.currentStatus == .completed)
+                
+                progressNode(title: "Reached", active: context.state.currentStatus == .arrived || context.state.currentStatus == .completed)
+                progressLine(active: context.state.currentStatus == .completed)
+                
+                progressNode(title: "Done", active: context.state.currentStatus == .completed)
             }
             
             // Status + live ETA block
@@ -197,7 +205,8 @@ struct DeliveryTrackingLockScreenView: View {
         case .placed:          return "Order finalized. Logistics partner en route."
         case .partnerAssigned: return "Delivery Partner Assigned"
         case .dispatched:      return "Out for Delivery"
-        case .arrived:         return "Courier Arrived"
+        case .arrived:         return "Courier Arrived / Order Reached"
+        case .completed:       return "Order Completed Successfully 🎉"
         }
     }
 }

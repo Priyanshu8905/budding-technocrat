@@ -228,13 +228,13 @@ struct CheckoutView: View {
     // MARK: - Fulfillment Logic
     private func processFulfillment() {
         if selectedPaymentMethod == .cardPayment {
-            // Show spinner, then lock instantly (no grace window for card)
+            // Show spinner, then place order with 30-second grace window (just like COD)
             screenState = .processingPayment
             Task {
                 try? await Task.sleep(for: .seconds(2.5))
                 await MainActor.run {
                     screenState = .idle
-                    shouldStartGraceOnConfirm = false
+                    shouldStartGraceOnConfirm = true
 
                     CheckoutManager.shared.startCheckout(
                         items: cartViewModel.items,
@@ -243,20 +243,6 @@ struct CheckoutView: View {
                         deliveryFee: cartViewModel.deliveryFee,
                         grandTotal: cartViewModel.grandTotal,
                         paymentType: .cardPayment
-                    )
-                    // Card: cancel grace task and force-lock immediately
-                    CheckoutManager.shared.timerTask?.cancel()
-                    CheckoutManager.shared.state = .orderLocked
-
-                    // Write widget data
-                    WidgetDataBridge.shared.writeActiveDelivery(
-                        orderID: CheckoutManager.shared.orderID,
-                        statusLabel: "Order Locked — Card Paid",
-                        statusIcon: "creditcard.fill",
-                        progressFraction: 0.2,
-                        subtotal: cartViewModel.grandTotal,
-                        estimatedArrival: Date().addingTimeInterval(1800),
-                        paymentMethod: PaymentType.cardPayment.displayLabel
                     )
 
                     // Clear cart — order placed

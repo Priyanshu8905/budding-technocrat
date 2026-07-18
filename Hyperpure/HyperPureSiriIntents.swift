@@ -446,13 +446,15 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
         )
 
         AppShortcut(
-            intent: ShowKitchenStatusOnLockScreenIntent(),
+            intent: CheckActiveDeliveryStatusIntent(),
             phrases: [
                 "Show my kitchen delivery on \(.applicationName)",
-                "Update my lock screen widget in \(.applicationName)"
+                "Update my lock screen widget in \(.applicationName)",
+                "Check kitchen delivery status on \(.applicationName)",
+                "Where is my kitchen order on \(.applicationName)"
             ],
-            shortTitle: "Kitchen Lock Screen",
-            systemImageName: "lock.iphone"
+            shortTitle: "Check delivery status",
+            systemImageName: "box.truck.fill"
         )
 
         AppShortcut(

@@ -20,8 +20,12 @@ struct OrderConfirmationView: View {
         if case .gracePeriodActive(let s) = checkoutManager.state { return s }
         return 0
     }
-    private var isLocked: Bool {
-        checkoutManager.state == .orderLocked || checkoutManager.state == .dispatched
+    
+    private var isFinalized: Bool {
+        switch checkoutManager.state {
+        case .gracePeriodActive, .idle: return false
+        default: return true
+        }
     }
 
     var body: some View {
@@ -132,7 +136,7 @@ struct OrderConfirmationView: View {
                         }
 
                         // Live dispatch timer (shows only during grace)
-                        if !isLocked {
+                        if !isFinalized {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("DISPATCH ELAPSED")
                                     .font(.caption.bold()).foregroundColor(Theme.textMuted)
@@ -153,8 +157,8 @@ struct OrderConfirmationView: View {
                             .padding(.horizontal)
                         }
 
-                        // Map shown when locked
-                        if isLocked {
+                        // Map shown when locked/finalized
+                        if isFinalized {
                             SourcingMapView()
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                         } else {
@@ -176,7 +180,7 @@ struct OrderConfirmationView: View {
                 }
 
                 // Go to Dashboard — returns to HomeView root
-                if isLocked {
+                if isFinalized {
                     VStack {
                         Button {
                             AppState.shared.isCartPresented = false
@@ -196,7 +200,7 @@ struct OrderConfirmationView: View {
             }
 
             // Persistent Grace Period Bottom Bar
-            if !isLocked {
+            if !isFinalized {
                 VStack {
                     Spacer()
                     VStack(spacing: 14) {
@@ -271,9 +275,6 @@ struct OrderConfirmationView: View {
                     paymentType: .cashOnDelivery
                 )
                 cartViewModel.clear()
-            } else if !shouldStartGracePeriod && checkoutManager.state == .idle {
-                CheckoutManager.shared.state = .orderLocked
-                launchLiveActivity()
             }
 
             // Watch for grace → locked transition to fire Live Activity
@@ -281,19 +282,12 @@ struct OrderConfirmationView: View {
                 while true {
                     try? await Task.sleep(for: .seconds(1))
                     let s = await MainActor.run { CheckoutManager.shared.state }
-                    if s == .orderLocked {
+                    if s != .idle && {
+                        if case .gracePeriodActive = s { return false }
+                        return true
+                    }() {
                         await MainActor.run {
-                            postLocalNotification(title: "Order Finalized", body: "30s grace elapsed. Sourcing pipeline locked.")
                             launchLiveActivity()
-                            WidgetDataBridge.shared.writeActiveDelivery(
-                                orderID: CheckoutManager.shared.orderID,
-                                statusLabel: "Order Locked & Preparing",
-                                statusIcon: "lock.fill",
-                                progressFraction: 0.2,
-                                subtotal: CheckoutManager.shared.grandTotal,
-                                estimatedArrival: Date().addingTimeInterval(1800),
-                                paymentMethod: CheckoutManager.shared.paymentType.displayLabel
-                            )
                         }
                         break
                     }
@@ -359,14 +353,20 @@ struct SourcingMapView: View {
     let warehouse   = CLLocationCoordinate2D(latitude: 28.6270, longitude: 77.2150)
     let destination = CLLocationCoordinate2D(latitude: 28.6328, longitude: 77.2195)
 
-    @State private var courierPosition = CLLocationCoordinate2D(latitude: 28.6270, longitude: 77.2150)
-    @State private var progress: Double = 0.0
-    @State private var timer: Timer?
-    @State private var notifiedSteps: Set<Int> = []
     @State private var position: MapCameraPosition = .region(
         MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 28.6299, longitude: 77.2172),
                            span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012))
     )
+
+    private var progress: Double {
+        CheckoutManager.shared.courierProgress
+    }
+
+    private var courierPosition: CLLocationCoordinate2D {
+        let lat = warehouse.latitude + (destination.latitude - warehouse.latitude) * progress
+        let lon = warehouse.longitude + (destination.longitude - warehouse.longitude) * progress
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -406,41 +406,5 @@ struct SourcingMapView: View {
         .background(Color(uiColor: .systemBackground))
         .cornerRadius(Theme.radiusMd)
         .padding(.horizontal)
-        .onAppear { startCourierSimulation() }
-        .onDisappear { timer?.invalidate() }
-    }
-
-    private func startCourierSimulation() {
-        progress = 0.0; courierPosition = warehouse; notifiedSteps = []
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
-            if progress < 1.0 {
-                withAnimation(.linear(duration: 1.5)) {
-                    progress += 0.05
-                    if progress > 1.0 { progress = 1.0 }
-                    let lat = warehouse.latitude + (destination.latitude - warehouse.latitude) * progress
-                    let lon = warehouse.longitude + (destination.longitude - warehouse.longitude) * progress
-                    courierPosition = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                }
-                let pct = Int(round(progress * 100))
-                if pct >= 20 && pct < 60 && !notifiedSteps.contains(20) {
-                    notifiedSteps.insert(20)
-                    postLocalNotification(title: "Courier Assigned", body: "Loading consignment at CP warehouse.")
-                    WidgetDataBridge.shared.updateProgress(0.4, statusLabel: "Courier Assigned", statusIcon: "person.fill")
-                } else if pct >= 60 && pct < 100 && !notifiedSteps.contains(60) {
-                    notifiedSteps.insert(60)
-                    postLocalNotification(title: "Consignment Dispatched", body: "Logistics partner departed hub.")
-                    WidgetDataBridge.shared.updateProgress(0.7, statusLabel: "Out for Delivery", statusIcon: "shippingbox.fill")
-                }
-            } else {
-                timer?.invalidate()
-                if !notifiedSteps.contains(100) {
-                    notifiedSteps.insert(100)
-                    postLocalNotification(title: "Courier Arrived 🎉", body: "Delivered to your restaurant dock!")
-                    CheckoutManager.shared.state = .dispatched
-                    WidgetDataBridge.shared.updateProgress(1.0, statusLabel: "Delivered!", statusIcon: "checkmark.seal.fill")
-                }
-            }
-        }
     }
 }
