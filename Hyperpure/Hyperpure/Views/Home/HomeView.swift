@@ -2,7 +2,9 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
+    @State private var weatherViewModel = WeatherViewModel()
     @State private var isCategoriesSheetPresented = false
+    @State private var isWeatherDetailsPresented = false
     @Environment(CartViewModel.self) private var cartViewModel
     var onNavigateToCategory: ((String) -> Void)?
     var onOpenSmartLists: (() -> Void)?
@@ -18,6 +20,10 @@ struct HomeView: View {
                     )
                     
                     BannerView()
+                    
+                    WeatherBannerView(weatherViewModel: weatherViewModel) {
+                        isWeatherDetailsPresented = true
+                    }
                     
                     CategoryGridView(categories: viewModel.categories) { categoryId in
                         onNavigateToCategory?(categoryId)
@@ -94,6 +100,9 @@ struct HomeView: View {
                 onNavigateToCategory?(categoryId)
             }
             .presentationDetents([.fraction(0.65), .large])
+        }
+        .sheet(isPresented: $isWeatherDetailsPresented) {
+            WeatherDetailView(weatherViewModel: weatherViewModel)
         }
     }
 }

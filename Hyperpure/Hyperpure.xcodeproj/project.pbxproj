@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A00000000000000000000002 /* WeatherIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000001 /* WeatherIntelligence.swift */; };
+		A00000000000000000000004 /* WeatherViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000003 /* WeatherViewModel.swift */; };
+		A00000000000000000000006 /* WeatherBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000005 /* WeatherBannerView.swift */; };
+		A00000000000000000000008 /* WeatherDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000007 /* WeatherDetailView.swift */; };
 		B5BF1DC52122454C87E4E34E /* HyperpureApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4537874A4832428F830F2215 /* HyperpureApp.swift */; };
 		B87643544A22491AAAC1057A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92A6B827E814120B2CADA4B /* Theme.swift */; };
 		3EA936C89D1744FBB95E53F7 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AF8BE19BBF4E4ABC383E49 /* Product.swift */; };
@@ -54,6 +58,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A00000000000000000000001 /* WeatherIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WeatherIntelligence.swift"; path = "Hyperpure/Models/WeatherIntelligence.swift"; sourceTree = "<group>"; };
+		A00000000000000000000003 /* WeatherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WeatherViewModel.swift"; path = "Hyperpure/ViewModels/WeatherViewModel.swift"; sourceTree = "<group>"; };
+		A00000000000000000000005 /* WeatherBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WeatherBannerView.swift"; path = "Hyperpure/Views/Home/WeatherBannerView.swift"; sourceTree = "<group>"; };
+		A00000000000000000000007 /* WeatherDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WeatherDetailView.swift"; path = "Hyperpure/Views/Home/WeatherDetailView.swift"; sourceTree = "<group>"; };
 		4537874A4832428F830F2215 /* HyperpureApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HyperpureApp.swift"; path = "Hyperpure/App/HyperpureApp.swift"; sourceTree = "<group>"; };
 		E92A6B827E814120B2CADA4B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Theme.swift"; path = "Hyperpure/App/Theme.swift"; sourceTree = "<group>"; };
 		75AF8BE19BBF4E4ABC383E49 /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Product.swift"; path = "Hyperpure/Models/Product.swift"; sourceTree = "<group>"; };
@@ -134,6 +142,7 @@
 		0DD61E6445F84CCCA2A54132 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000001 /* WeatherIntelligence.swift */,
 				75AF8BE19BBF4E4ABC383E49 /* Product.swift */,
 				D1E0326BB08C45B982AAFEE7 /* Category.swift */,
 				3A2CE8B136D44EA4AC9205A6 /* CartItem.swift */,
@@ -157,6 +166,7 @@
 		29DF6089555D4BF18756A15F /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000003 /* WeatherViewModel.swift */,
 				C2AE9ED41E644EC79883AD49 /* CartViewModel.swift */,
 				E68DFD3A786B40309D397A2D /* AuthViewModel.swift */,
 				7E216C9B3C2042BFA729F89D /* CatalogueViewModel.swift */,
@@ -178,6 +188,8 @@
 		64EFD1AC879D44AB8A453636 /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000005 /* WeatherBannerView.swift */,
+				A00000000000000000000007 /* WeatherDetailView.swift */,
 				AA1AAF2307D541759C96CB82 /* HeaderView.swift */,
 				35721BBCF094409E97D9AD1E /* BannerView.swift */,
 				B850AC0924304823A56D6495 /* CategoryGridView.swift */,
@@ -357,6 +369,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000002 /* WeatherIntelligence.swift in Sources */,
+				A00000000000000000000004 /* WeatherViewModel.swift in Sources */,
+				A00000000000000000000006 /* WeatherBannerView.swift in Sources */,
+				A00000000000000000000008 /* WeatherDetailView.swift in Sources */,
 				B5BF1DC52122454C87E4E34E /* HyperpureApp.swift in Sources */,
 				B87643544A22491AAAC1057A /* Theme.swift in Sources */,
 				3EA936C89D1744FBB95E53F7 /* Product.swift in Sources */,

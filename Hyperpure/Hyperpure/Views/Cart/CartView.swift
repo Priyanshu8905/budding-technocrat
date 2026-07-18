@@ -194,6 +194,60 @@ struct CartView: View {
                                 }
                             }
                             
+                            // Weather Shield Card
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "checkmark.shield.fill")
+                                        .foregroundColor(Theme.primary)
+                                        .font(.title3)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Weather Shield Optimization")
+                                            .font(.subheadline.weight(.bold))
+                                            .foregroundColor(Theme.textPrimary)
+                                        
+                                        Text("Adjusts volumes to avoid monsoon rotting & capture demand surges.")
+                                            .font(.caption2)
+                                            .foregroundColor(Theme.textSecondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Toggle("", isOn: Binding(
+                                        get: { cartViewModel.isWeatherOptimizedApplied },
+                                        set: { newValue in
+                                            withAnimation(.spring()) {
+                                                if newValue {
+                                                    let baselineProducts = cartViewModel.items.map { $0.product }
+                                                    let tempViewModel = WeatherViewModel()
+                                                    tempViewModel.applyPreset(.monsoon, for: baselineProducts)
+                                                    cartViewModel.applyWeatherAdjustments(suggestions: tempViewModel.suggestions)
+                                                } else {
+                                                    cartViewModel.removeWeatherAdjustments()
+                                                }
+                                            }
+                                        }
+                                    ))
+                                    .labelsHidden()
+                                    .tint(Theme.primary)
+                                }
+                                
+                                if cartViewModel.isWeatherOptimizedApplied {
+                                    HStack {
+                                        Text("Monsoon Protection active: Perishables reduced by up to 35% to prevent spoilage.")
+                                            .font(.caption2.weight(.medium))
+                                            .foregroundColor(Theme.success)
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 6)
+                                    .background(Theme.successLight)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                                }
+                            }
+                            .padding(14)
+                            .cardStyle()
+                            
                             // Delivery Slot Section
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Select Delivery Slot")
