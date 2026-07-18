@@ -54,6 +54,7 @@ public class CheckoutManager {
     public var courierProgress: Double = 0.0
     var timerTask: Task<Void, Never>?
     private var simulationTask: Task<Void, Never>?
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
 
     // Checkout payload — true data from cart at order time
     var purchasedItems: [CartItem] = []
@@ -65,6 +66,64 @@ public class CheckoutManager {
     var dispatchedAt: Date = .now
 
     private init() {}
+
+    // MARK: Activity restoration logic
+    public func restoreActiveActivityIfAny() {
+        guard let activeActivity = Activity<DeliveryTrackingAttributes>.activities.first else { return }
+        
+        let state = activeActivity.content.state
+        let attrs = activeActivity.attributes
+        
+        self.orderID = attrs.orderID
+        self.grandTotal = state.subtotal
+        self.paymentType = state.paymentMethod == PaymentType.cardPayment.displayLabel ? .cardPayment : .cashOnDelivery
+        
+        switch state.currentStatus {
+        case .placed:
+            self.state = .orderLocked
+            self.courierProgress = 0.2
+        case .partnerAssigned:
+            self.state = .orderLocked
+            self.courierProgress = 0.4
+        case .dispatched:
+            self.state = .dispatched
+            self.courierProgress = 0.7
+        case .arrived:
+            self.state = .arrived
+            self.courierProgress = 0.9
+        case .completed:
+            self.state = .completed
+            self.courierProgress = 1.0
+        }
+        
+        if self.purchasedItems.isEmpty {
+            let placeholderProduct = Product(
+                id: 9999,
+                name: "Wholesale Consignment",
+                category: "wholesale",
+                subcategory: "Sourced Items",
+                price: Double(state.subtotal),
+                mrp: Double(state.subtotal),
+                unit: "unit",
+                weight: "\(state.itemCount) items",
+                description: "Sourced consignment details",
+                inStock: true,
+                isPopular: false,
+                rating: 5.0,
+                reviewCount: 100,
+                packInfo: nil,
+                customBadge: nil,
+                recentBuyersCount: nil,
+                isAd: false,
+                bestRateText: nil,
+                unitSubtext: nil,
+                minQtyText: nil
+            )
+            self.purchasedItems = [CartItem(product: placeholderProduct, quantity: 1)]
+            self.subtotal = state.subtotal
+            self.grandTotal = state.subtotal
+        }
+    }
 
     // MARK: Start with full payload
     func startCheckout(
@@ -101,6 +160,10 @@ public class CheckoutManager {
     public func cancelCheckout() {
         timerTask?.cancel()
         simulationTask?.cancel()
+        if backgroundTaskID != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = .invalid
+        }
         state = .idle
         courierProgress = 0.0
         CartViewModel.shared.clear()
@@ -118,6 +181,17 @@ public class CheckoutManager {
         state = .orderLocked
         dispatchedAt = .now
         courierProgress = 0.0
+
+        // Begin background task to survive minimization
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask(withName: "DeliverySimulation") { [weak self] in
+            guard let self = self else { return }
+            Task { @MainActor in
+                if self.backgroundTaskID != .invalid {
+                    UIApplication.shared.endBackgroundTask(self.backgroundTaskID)
+                    self.backgroundTaskID = .invalid
+                }
+            }
+        }
 
         // Write widget data to App Group
         WidgetDataBridge.shared.writeActiveDelivery(
@@ -159,7 +233,7 @@ public class CheckoutManager {
             // progress: 0.0 -> 1.0 (updates by 0.02 every 0.6 seconds, takes 30 seconds total)
             for _ in 1...50 {
                 try? await Task.sleep(for: .milliseconds(600))
-                if Task.isCancelled { return }
+                if Task.isCancelled { break }
                 
                 self.courierProgress += 0.02
                 if self.courierProgress > 1.0 { self.courierProgress = 1.0 }
@@ -176,6 +250,12 @@ public class CheckoutManager {
                 } else if progress >= 0.25 {
                     await updateDeliveryStep(.partnerAssigned, progress: 0.4)
                 }
+            }
+            
+            // End the background task
+            if self.backgroundTaskID != .invalid {
+                UIApplication.shared.endBackgroundTask(self.backgroundTaskID)
+                self.backgroundTaskID = .invalid
             }
         }
     }
