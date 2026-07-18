@@ -54,7 +54,7 @@ struct MainTabView: View {
                 }
                 .tag(3)
         }
-        .accentColor(Theme.primary)
+        .tint(Theme.primary)
         .sheet(isPresented: $isSmartListsPresented) {
             SmartListsView()
         }
