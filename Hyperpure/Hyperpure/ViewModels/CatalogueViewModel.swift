@@ -1,58 +1,85 @@
-import Foundation
+import SwiftUI
 import Observation
 
 enum SortOption: String, CaseIterable, Identifiable {
-    case relevance = "Relevance"
+    case popular = "Popularity"
     case priceLowToHigh = "Price: Low to High"
     case priceHighToLow = "Price: High to Low"
-    case discount = "Highest Discount"
+    case rating = "Customer Rating"
     
     var id: String { rawValue }
 }
 
 @Observable
 final class CatalogueViewModel {
+    var categories: [Category] = MockCategories.categories
+    var products: [Product] = MockProducts.products
     var selectedCategoryId: String? = nil
     var searchQuery: String = ""
-    var selectedSort: SortOption = .relevance
+    var selectedSort: SortOption = .popular
+    var isLoading: Bool = false
     
-    private(set) var allProducts: [Product] = MockProducts.products
-    private(set) var allCategories: [Category] = MockCategories.categories
+    var allCategories: [Category] { categories }
+    
+    init() {
+        Task {
+            await loadInitialData()
+        }
+    }
+    
+    @MainActor
+    func loadInitialData() async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            async let fetchedCategories = SupabaseService.shared.fetchCategories()
+            async let fetchedProducts = SupabaseService.shared.fetchProducts()
+            
+            self.categories = try await fetchedCategories
+            self.products = try await fetchedProducts
+        } catch {
+            self.categories = MockCategories.categories
+            self.products = MockProducts.products
+        }
+    }
+    
+    func selectCategory(_ categoryId: String?) {
+        selectedCategoryId = categoryId
+    }
+    
+    func productCount(for categoryId: String?) -> Int {
+        guard let categoryId = categoryId else { return products.count }
+        return products.filter { $0.category == categoryId }.count
+    }
     
     var filteredProducts: [Product] {
-        var results = allProducts
+        var result = products
         
-        if let categoryId = selectedCategoryId {
-            results = results.filter { $0.category == categoryId }
+        if let catId = selectedCategoryId {
+            result = result.filter { $0.category == catId }
         }
         
         if !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            let q = searchQuery.lowercased()
-            results = results.filter {
-                $0.name.lowercased().contains(q) ||
-                $0.subcategory.lowercased().contains(q) ||
-                $0.description.lowercased().contains(q)
+            let lower = searchQuery.lowercased()
+            result = result.filter {
+                $0.name.lowercased().contains(lower) ||
+                $0.category.lowercased().contains(lower) ||
+                $0.description.lowercased().contains(lower)
             }
         }
         
         switch selectedSort {
-        case .relevance:
-            return results
+        case .popular:
+            result.sort { $0.isPopular && !$1.isPopular }
         case .priceLowToHigh:
-            return results.sorted { $0.price < $1.price }
+            result.sort { $0.price < $1.price }
         case .priceHighToLow:
-            return results.sorted { $0.price > $1.price }
-        case .discount:
-            return results.sorted { $0.discountPercent > $1.discountPercent }
+            result.sort { $0.price > $1.price }
+        case .rating:
+            result.sort { $0.rating > $1.rating }
         }
-    }
-    
-    func productCount(for categoryId: String?) -> Int {
-        guard let categoryId = categoryId else { return allProducts.count }
-        return allProducts.filter { $0.category == categoryId }.count
-    }
-    
-    func selectCategory(_ id: String?) {
-        selectedCategoryId = id
+        
+        return result
     }
 }

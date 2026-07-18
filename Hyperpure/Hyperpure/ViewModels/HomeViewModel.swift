@@ -1,27 +1,34 @@
-import Foundation
+import SwiftUI
 import Observation
 
 @Observable
 final class HomeViewModel {
-    private(set) var categories: [Category] = MockCategories.categories
-    private(set) var popularProducts: [Product] = MockProducts.products.filter { $0.isPopular }
-    private(set) var testimonials: [Testimonial] = MockContent.testimonials
-    private(set) var faqs: [FAQItem] = MockContent.faqs
-    private(set) var stats: [StatItem] = MockContent.stats
-    private(set) var supplyChainSteps: [SupplyChainStep] = MockContent.supplyChainSteps
+    var categories: [Category] = MockCategories.categories
+    var featuredProducts: [Product] = MockProducts.products
+    var isLoading: Bool = false
+    var errorMessage: String?
     
-    var activeHeroIndex: Int = 0
-    var expandedFAQIndex: Int? = 0
-    
-    func nextHeroSlide() {
-        activeHeroIndex = (activeHeroIndex + 1) % 3
+    init() {
+        Task {
+            await loadData()
+        }
     }
     
-    func toggleFAQ(index: Int) {
-        if expandedFAQIndex == index {
-            expandedFAQIndex = nil
-        } else {
-            expandedFAQIndex = index
+    @MainActor
+    func loadData() async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            async let fetchedCategories = SupabaseService.shared.fetchCategories()
+            async let fetchedProducts = SupabaseService.shared.fetchProducts()
+            
+            self.categories = try await fetchedCategories
+            self.featuredProducts = try await fetchedProducts
+        } catch {
+            self.errorMessage = error.localizedDescription
+            self.categories = MockCategories.categories
+            self.featuredProducts = MockProducts.products
         }
     }
 }
