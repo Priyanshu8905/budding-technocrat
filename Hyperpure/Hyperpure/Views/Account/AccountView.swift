@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct AccountView: View {
-    @Environment(AuthViewModel.self) private var authViewModel
     @State private var isVegModeOn = false
     
     var body: some View {
@@ -20,11 +19,11 @@ struct AccountView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(authViewModel.isLoggedIn ? (authViewModel.currentUser?.name ?? "Guest Outlet") : "Guest Outlet")
+                            Text("Guest Outlet")
                                 .font(.title3.weight(.bold))
                                 .foregroundColor(Theme.textPrimary)
                             
-                            Text(authViewModel.isLoggedIn ? "+91 \(authViewModel.currentUser?.phone ?? "")" : "Guest Account")
+                            Text("Guest Account")
                                 .font(.subheadline)
                                 .foregroundColor(Theme.textMuted)
                         }
@@ -146,31 +145,6 @@ struct AccountView: View {
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radiusLg))
                     }
                     
-                    // Logout Card
-                    Button {
-                        authViewModel.logout()
-                    } label: {
-                        HStack(spacing: 14) {
-                            Image(systemName: "power")
-                                .font(.body.weight(.bold))
-                                .foregroundColor(Theme.primary)
-                                .frame(width: 24)
-                            
-                            Text("Logout")
-                                .font(.subheadline.weight(.bold))
-                                .foregroundColor(Theme.primary)
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundColor(Theme.textMuted)
-                        }
-                        .padding(16)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.radiusLg))
-                    }
-                    
                     // App Version Footer
                     Text("App version v5.10.0")
                         .font(.caption)
@@ -180,6 +154,7 @@ struct AccountView: View {
                 .padding(16)
             }
             .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -209,7 +184,7 @@ struct AccountRowItem: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.primary)
+                    .background(Color.orange)
                     .clipShape(Capsule())
             }
             
@@ -223,5 +198,4 @@ struct AccountRowItem: View {
 
 #Preview {
     AccountView()
-        .environment(AuthViewModel())
 }

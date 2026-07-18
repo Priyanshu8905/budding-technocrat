@@ -3,7 +3,6 @@ import SwiftUI
 struct CartView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(CartViewModel.self) private var cartViewModel
-    @Environment(AuthViewModel.self) private var authViewModel
     @State private var isWholesaleSelected = true
     @State private var selectedDeliverySlot = 0
     
@@ -293,11 +292,9 @@ struct CartView: View {
                             .cardStyle()
                             
                             Button {
-                                if !authViewModel.isLoggedIn {
-                                    authViewModel.isLoginSheetPresented = true
-                                }
+                                // Proceed to checkout
                             } label: {
-                                Text(authViewModel.isLoggedIn ? "Proceed to Checkout" : "Login to Checkout")
+                                Text("Proceed to Checkout")
                                     .font(.headline.weight(.bold))
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
@@ -342,5 +339,4 @@ struct SummaryRow: View {
 #Preview {
     CartView()
         .environment(CartViewModel())
-        .environment(AuthViewModel())
 }

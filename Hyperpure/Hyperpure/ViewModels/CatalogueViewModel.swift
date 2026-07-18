@@ -22,26 +22,12 @@ final class CatalogueViewModel {
     var allCategories: [Category] { categories }
     
     init() {
-        Task {
-            await loadInitialData()
-        }
+        loadInitialData()
     }
     
-    @MainActor
-    func loadInitialData() async {
-        isLoading = true
-        defer { isLoading = false }
-        
-        do {
-            async let fetchedCategories = SupabaseService.shared.fetchCategories()
-            async let fetchedProducts = SupabaseService.shared.fetchProducts()
-            
-            self.categories = try await fetchedCategories
-            self.products = try await fetchedProducts
-        } catch {
-            self.categories = MockCategories.categories
-            self.products = MockProducts.products
-        }
+    func loadInitialData() {
+        self.categories = MockCategories.categories
+        self.products = MockProducts.products
     }
     
     func selectCategory(_ categoryId: String?) {

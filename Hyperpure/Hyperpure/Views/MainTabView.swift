@@ -5,13 +5,12 @@ struct MainTabView: View {
     @State private var isSmartListsPresented = false
     @State private var isCartPresented = false
     @Environment(CartViewModel.self) private var cartViewModel
-    @Environment(AuthViewModel.self) private var authViewModel
     
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView(
                 onNavigateToCategory: { categoryId in
-                    // Navigate to category action
+                    // Navigate action
                 },
                 onOpenSmartLists: {
                     isSmartListsPresented = true
@@ -39,11 +38,15 @@ struct MainTabView: View {
             .badge("NEW")
             .tag(1)
             
-            OrdersView()
-                .tabItem {
-                    Label("Orders", systemImage: "bag.fill")
+            OrdersView(
+                onStartShopping: {
+                    selectedTab = 0
                 }
-                .tag(2)
+            )
+            .tabItem {
+                Label("Orders", systemImage: "bag.fill")
+            }
+            .tag(2)
             
             AccountView()
                 .tabItem {
@@ -58,14 +61,10 @@ struct MainTabView: View {
         .sheet(isPresented: $isCartPresented) {
             CartView()
         }
-        .sheet(isPresented: Bindable(authViewModel).isLoginSheetPresented) {
-            LoginView()
-        }
     }
 }
 
 #Preview {
     MainTabView()
         .environment(CartViewModel())
-        .environment(AuthViewModel())
 }
