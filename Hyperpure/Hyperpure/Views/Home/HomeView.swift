@@ -1,14 +1,13 @@
 import SwiftUI
-import MapKit
+import SwiftData
 
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var searchText: String = ""
     @State private var weatherViewModel = WeatherIntelligenceViewModel.shared
     @State private var isCategoriesSheetPresented = false
-    @State private var isTrackingSheetPresented = false
-    @State private var checkoutManager = CheckoutManager.shared
     @Environment(CartViewModel.self) private var cartViewModel
+    @Query private var pantryItems: [PantryItem]
     var onNavigateToCategory: ((String) -> Void)?
     var onOpenSmartLists: (() -> Void)?
     var onOpenCart: (() -> Void)?
@@ -24,6 +23,8 @@ struct HomeView: View {
                                 onOpenSmartLists: onOpenSmartLists,
                                 onOpenCart: onOpenCart
                             )
+                            
+                            weatherIntelligenceCard
                             
                             BannerView { categoryId in
                                 onNavigateToCategory?(categoryId)
@@ -90,53 +91,6 @@ struct HomeView: View {
                         .padding(.bottom, 24)
                     }
                     .background(Color(uiColor: .systemGroupedBackground))
-                    
-                    // Floating Mini-Tracker Pill (shows during all non-idle delivery steps)
-                    if checkoutManager.state != .idle {
-                        Button {
-                            isTrackingSheetPresented = true
-                        } label: {
-                            HStack(spacing: 12) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Theme.primary.opacity(0.15))
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: trackingIcon)
-                                        .foregroundColor(Theme.primary)
-                                        .font(.headline)
-                                }
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(trackingTitle)
-                                        .font(.subheadline.bold())
-                                        .foregroundColor(Theme.textPrimary)
-                                    Text(trackingSubtitle)
-                                        .font(.caption)
-                                        .foregroundColor(Theme.textSecondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Theme.textMuted)
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(20)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-                            )
-                            .shadow(color: Color.black.opacity(0.08), radius: 10, y: 5)
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 16)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                    }
                 }
             }
             .navigationTitle("Shop")
@@ -158,262 +112,143 @@ struct HomeView: View {
                 }
                 .presentationDetents([.fraction(0.65), .large])
             }
-            .sheet(isPresented: $isTrackingSheetPresented) {
-                DeliveryTrackingDetailSheet()
-            }
         }
     }
-    
-    private var trackingIcon: String {
-        switch checkoutManager.state {
-        case .gracePeriodActive: return "clock.fill"
-        case .orderLocked:       return "lock.fill"
-        case .dispatched:        return "shippingbox.fill"
-        case .arrived:           return "house.fill"
-        case .completed:         return "checkmark.seal.fill"
-        default:                 return "box.truck.fill"
-        }
-    }
-    
-    private var trackingTitle: String {
-        switch checkoutManager.state {
-        case .gracePeriodActive(let secs): return "Grace Window: \(secs)s remaining"
-        case .orderLocked:       return "Order Locked & Preparing"
-        case .dispatched:        return "Out for Delivery"
-        case .arrived:           return "Courier Arrived (Order Reached)"
-        case .completed:         return "Order Completed 🎉"
-        default:                 return "Delivery Active"
-        }
-    }
-    
-    private var trackingSubtitle: String {
-        switch checkoutManager.state {
-        case .gracePeriodActive: return "You can still add items or cancel order."
-        case .orderLocked:       return "Consignment being loaded at warehouse."
-        case .dispatched:        return "Courier is en route to your kitchen."
-        case .arrived:           return "Courier reached Connaught Place dock."
-        case .completed:         return "Consignment delivered. Tap to view receipt."
-        default:                 return "Tap to view live map tracking details."
-        }
-    }
-}
 
-struct DeliveryTrackingDetailSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var checkoutManager = CheckoutManager.shared
+    private func categoryEmoji(for categoryId: String) -> String {
+        MockCategories.categories.first(where: { $0.id == categoryId })?.icon ?? "📦"
+    }
     
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Map Panel
-                    SourcingMapView()
-                        .frame(height: 250)
-                        .cornerRadius(18)
-                        .padding(.horizontal)
+    // MARK: - Weather Intelligence Card
+    
+    private var weatherCardColor: Color {
+        switch weatherViewModel.currentState {
+        case .normal: return Color.green
+        case .monsoon: return Color.blue
+        case .heatwave: return Color.orange
+        case .winterCold: return Color.cyan
+        }
+    }
+    
+    private var weatherIconName: String {
+        switch weatherViewModel.currentState {
+        case .normal: return "sun.max.fill"
+        case .monsoon: return "cloud.rain.fill"
+        case .heatwave: return "thermometer.sun.fill"
+        case .winterCold: return "snowflake"
+        }
+    }
+    
+    private var weatherDescription: String {
+        switch weatherViewModel.currentState {
+        case .normal:
+            return "Weather is stable. Standard replenishment recommended."
+        case .monsoon:
+            return "Monsoon warning active. Warm comfort foods are recommended."
+        case .heatwave:
+            return "Extreme heat active. Spoilage risk is high, cooling items recommended."
+        case .winterCold:
+            return "Cold wave active. Warm beverages and comfort foods recommended."
+        }
+    }
+    
+    private func isProductInStockInPantry(_ product: Product) -> Bool {
+        pantryItems.contains { item in
+            let itemName = item.name.lowercased()
+            let prodName = product.name.lowercased()
+            let isMatch = itemName.contains(prodName) || prodName.contains(itemName)
+            return isMatch && item.calculatedQuantity > 0 && item.status != "Critical"
+        }
+    }
+    
+    private var productsToSuggest: [Product] {
+        let weatherState = weatherViewModel.currentState
+        let weatherSuggestedProducts: [Product]
+        switch weatherState {
+        case .normal:
+            weatherSuggestedProducts = MockProducts.products.filter { [1, 301, 402].contains($0.id) }
+        case .monsoon:
+            weatherSuggestedProducts = MockProducts.products.filter { [11, 12, 13].contains($0.id) }
+        case .heatwave:
+            weatherSuggestedProducts = MockProducts.products.filter { [102, 402, 203].contains($0.id) }
+        case .winterCold:
+            weatherSuggestedProducts = MockProducts.products.filter { [801, 401, 11].contains($0.id) }
+        }
+        
+        return weatherSuggestedProducts.filter { !isProductInStockInPantry($0) }
+    }
+    
+    @ViewBuilder
+    private var weatherIntelligenceCard: some View {
+        let suggested = productsToSuggest
+        if suggested.isEmpty {
+            EmptyView()
+        } else {
+            NavigationLink(destination: WeatherIntelligenceView()) {
+                HStack(spacing: 12) {
+                    Image(systemName: weatherIconName)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [weatherCardColor, weatherCardColor.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        )
+                        .shadow(color: weatherCardColor.opacity(0.2), radius: 3, x: 0, y: 1.5)
                     
-                    // Consumer Details
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("DELIVERY RECIPIENT")
-                            .font(.caption.bold())
-                            .foregroundColor(Theme.textMuted)
-                        
-                        Divider()
-                        
-                        HStack(spacing: 12) {
-                            Image(systemName: "person.crop.circle.fill")
-                                .font(.title)
-                                .foregroundColor(Theme.primary)
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Kitchen Outpost NCR-08")
-                                    .font(.subheadline.bold())
-                                    .foregroundColor(Theme.textPrimary)
-                                Text("Connaught Place Block-B, New Delhi")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.textSecondary)
-                                Text("Contact: +91 98765 43210")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.textSecondary)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                    .cornerRadius(16)
-                    .padding(.horizontal)
-                    
-                    // Rider Activities & Estimated Time (Dynamically mapped to courier progress)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("LOGISTICS MILESTONES")
-                            .font(.caption.bold())
-                            .foregroundColor(Theme.textMuted)
-                        
-                        Divider()
-                        
-                        VStack(spacing: 16) {
-                            milestoneRow(
-                                title: "Order Placed & Confirmed",
-                                desc: "Wholesale consignment verified by sourcing gateway",
-                                time: "03:00 mins ago",
-                                isDone: true
-                            )
-                            
-                            milestoneRow(
-                                title: "Courier Assigned at Warehouse",
-                                desc: "Loading wheat flour and staples at CP hub",
-                                time: "1:30 mins ago",
-                                isDone: checkoutManager.courierProgress >= 0.25
-                            )
-                            
-                            milestoneRow(
-                                title: "Consignment Dispatched",
-                                desc: "En route via CP Outer Ring Rd.",
-                                time: "Just now",
-                                isDone: checkoutManager.courierProgress >= 0.55
-                            )
-                            
-                            milestoneRow(
-                                title: "Order Reached",
-                                desc: "Courier arrived at Connaught Place restaurant dock",
-                                time: "Just now",
-                                isDone: checkoutManager.courierProgress >= 0.85
-                            )
-
-                            milestoneRow(
-                                title: "Order Completed",
-                                desc: "Delivered successfully and added to history",
-                                time: "Just now",
-                                isDone: checkoutManager.courierProgress >= 1.0
-                            )
-                        }
-                    }
-                    .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                    .cornerRadius(16)
-                    .padding(.horizontal)
-                    
-                    // E-Receipt Panel
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("E-RECEIPT")
-                                .font(.caption.bold())
-                                .foregroundColor(Theme.textMuted)
-                            Spacer()
-                            // Clear history button if completed
-                            if checkoutManager.state == .completed {
-                                Button("Archive Tracking") {
-                                    checkoutManager.state = .idle
-                                    dismiss()
-                                }
-                                .font(.caption.bold())
-                                .foregroundColor(Theme.primary)
-                            }
-                        }
-                        
-                        Divider()
-                        
-                        HStack {
-                            Text("Consignment ID: \(checkoutManager.orderID)")
-                                .font(.caption.monospaced())
-                                .foregroundColor(Theme.textMuted)
-                            Spacer()
-                            Text("Paid via \(checkoutManager.paymentType.displayLabel)")
-                                .font(.caption2.bold())
-                                .foregroundColor(checkoutManager.paymentType == .cardPayment ? .green : Theme.primary)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background((checkoutManager.paymentType == .cardPayment ? Color.green : Theme.primary).opacity(0.1))
-                                .cornerRadius(4)
-                        }
-                        
-                        Divider()
-                        
-                        if checkoutManager.purchasedItems.isEmpty {
-                            Text("No items recorded.")
-                                .font(.caption)
-                                .foregroundColor(Theme.textMuted)
-                        } else {
-                            ForEach(checkoutManager.purchasedItems) { item in
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(item.product.name)
-                                            .font(.subheadline.bold())
-                                            .foregroundColor(Theme.textPrimary)
-                                        Text("Qty: \(item.quantity) units x ₹\(Int(round(item.product.price)))")
-                                            .font(.caption)
-                                            .foregroundColor(Theme.textSecondary)
-                                    }
-                                    Spacer()
-                                    Text("₹\(item.subtotal)")
-                                        .font(.subheadline.bold())
-                                        .foregroundColor(Theme.textPrimary)
-                                }
-                                .padding(.vertical, 2)
-                            }
-                        }
-                        
-                        Divider()
-                        
-                        SummaryRow(title: "Subtotal", value: "₹\(checkoutManager.subtotal)")
-                        SummaryRow(title: "Delivery Fee", value: checkoutManager.deliveryFee == 0 ? "FREE" : "₹\(checkoutManager.deliveryFee)")
-                        SummaryRow(title: "GST (5%)", value: "₹\(checkoutManager.tax)")
-                        
-                        Divider()
-                        
-                        HStack {
-                            Text("Total Amount Paid")
-                                .font(.subheadline.bold())
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text("\(weatherViewModel.currentState.rawValue) · \(Int(weatherViewModel.temperature))°C")
+                                .font(.subheadline.weight(.bold))
                                 .foregroundColor(Theme.textPrimary)
-                            Spacer()
-                            Text("₹\(checkoutManager.grandTotal)")
-                                .font(.title3.bold())
+                            
+                            Text("ALERT")
+                                .font(.system(size: 8, weight: .black))
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(Theme.primary.opacity(0.12))
                                 .foregroundColor(Theme.primary)
+                                .clipShape(Capsule())
                         }
+                        
+                        Text("\(suggested.count) suggested restock item\(suggested.count > 1 ? "s" : "") missing in pantry based on current weather condition.")
+                            .font(.caption)
+                            .foregroundColor(Theme.textSecondary)
                     }
-                    .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                    .cornerRadius(16)
-                    .padding(.horizontal)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Theme.textMuted)
                 }
-                .padding(.vertical)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color.white.opacity(0.95))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [weatherCardColor.opacity(0.3), weatherCardColor.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 3)
+                .padding(.horizontal, 16)
             }
-            .navigationTitle("Live Delivery Status")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Close") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func milestoneRow(title: String, desc: String, time: String, isDone: Bool) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack {
-                Circle()
-                    .fill(isDone ? Color.green : Color.gray.opacity(0.3))
-                    .frame(width: 12, height: 12)
-                
-                Rectangle()
-                    .fill(isDone ? Color.green : Color.gray.opacity(0.15))
-                    .frame(width: 2, height: 24)
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline.bold())
-                    .foregroundColor(isDone ? Theme.textPrimary : Theme.textMuted)
-                Text(desc)
-                    .font(.caption)
-                    .foregroundColor(Theme.textSecondary)
-                Text(time)
-                    .font(.system(size: 9))
-                    .foregroundColor(Theme.textMuted)
-            }
-            Spacer()
+            .buttonStyle(.plain)
         }
     }
 }
