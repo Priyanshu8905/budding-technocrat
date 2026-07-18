@@ -21,7 +21,8 @@ final class CatalogueViewModel {
     
     var allCategories: [Category] { categories }
     
-    init() {
+    init(initialCategoryId: String? = nil) {
+        self.selectedCategoryId = initialCategoryId
         loadInitialData()
     }
     

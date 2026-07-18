@@ -16,124 +16,41 @@ struct CartView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Header Segmented Toggle & Outlet Info (Screenshot 1)
-                VStack(spacing: 12) {
-                    HStack {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.title3.weight(.bold))
-                                .foregroundColor(Theme.textPrimary)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Guest Outlet")
-                                .font(.subheadline.weight(.bold))
-                                .foregroundColor(Theme.textPrimary)
-                            Text("Delhi, India, Delhi -")
-                                .font(.caption)
-                                .foregroundColor(Theme.textMuted)
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal, 16)
-                    
-                    // Wholesale / Express Pill Segmented Control
-                    HStack(spacing: 8) {
-                        HStack(spacing: 0) {
-                            Button {
-                                isWholesaleSelected = true
-                            } label: {
-                                Text("Wholesale")
-                                    .font(.subheadline.weight(.bold))
-                                    .foregroundColor(isWholesaleSelected ? .white : Theme.textPrimary)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
-                                    .background(isWholesaleSelected ? Theme.navyDark : Color.clear)
-                                    .clipShape(Capsule())
-                            }
-                            
-                            Button {
-                                isWholesaleSelected = false
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Text("⚡")
-                                    Text("Express")
-                                }
-                                .font(.subheadline.weight(.bold))
-                                .foregroundColor(isWholesaleSelected ? Theme.textPrimary : .white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(isWholesaleSelected ? Color.clear : Theme.navyDark)
-                                .clipShape(Capsule())
-                            }
-                        }
-                        .padding(3)
-                        .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                        .clipShape(Capsule())
-                        
-                        // Swap / Filter Icon Button (Screenshot 1)
-                        Button {
-                            // Swap action
-                        } label: {
-                            Image(systemName: "arrow.left.arrow.right")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(Theme.textMuted)
-                                .frame(width: 40, height: 40)
-                                .background(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 1))
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                }
-                .padding(.vertical, 10)
-                .background(Color.white)
-                
-                Divider()
-                
                 // Content Area
                 if cartViewModel.items.isEmpty {
-                    // Empty Cart State (Screenshot 1)
-                    VStack(spacing: 16) {
-                        Spacer()
-                        
-                        // Cart with box illustration
-                        ZStack {
-                            Circle()
-                                .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                                .frame(width: 160, height: 40)
-                                .offset(y: 50)
-                            
-                            VStack(spacing: -10) {
-                                Text("📦")
-                                    .font(.system(size: 60))
-                                Text("🛒")
-                                    .font(.system(size: 90))
+                    // Empty Cart State
+                    if #available(iOS 17.0, *) {
+                        ContentUnavailableView {
+                            Label("Your cart is empty!", systemImage: "cart.fill")
+                        } description: {
+                            Text("Add products from the catalogue to get started.")
+                        } actions: {
+                            Button("Start Shopping") {
+                                dismiss()
                             }
+                            .buttonStyle(.borderedProminent)
+                            .tint(Theme.primary)
                         }
-                        
-                        Text("Your cart is empty!")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundColor(Theme.textMuted)
-                            .padding(.top, 20)
-                        
-                        Spacer()
-                        
-                        Button {
-                            dismiss()
-                        } label: {
-                            Text("Start Shopping")
-                                .font(.headline.weight(.bold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(Theme.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+                    } else {
+                        VStack(spacing: 16) {
+                            Spacer()
+                            Image(systemName: "cart.fill")
+                                .font(.system(size: 50))
+                                .foregroundColor(Theme.textMuted)
+                            Text("Your cart is empty!")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundColor(Theme.textMuted)
+                            Spacer()
+                            Button("Start Shopping") {
+                                dismiss()
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(Theme.primary)
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 24)
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 24)
+                        .background(Color(uiColor: .systemGroupedBackground))
                     }
-                    .background(Color(uiColor: .systemGroupedBackground))
                 } else {
                     ScrollView {
                         VStack(spacing: 16) {
@@ -166,9 +83,9 @@ struct CartView: View {
                             }
                             .padding(12)
                             .background(Theme.primary.opacity(0.06))
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                             .overlay(
-                                RoundedRectangle(cornerRadius: Theme.radiusMd)
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
                                     .stroke(Theme.primary.opacity(0.15), lineWidth: 1)
                             )
                             
@@ -179,7 +96,7 @@ struct CartView: View {
                                             .font(.system(size: 32))
                                             .frame(width: 50, height: 50)
                                             .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                                            .clipShape(RoundedRectangle(cornerRadius: Theme.radiusSm))
+                                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                         
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(item.product.name)
@@ -202,7 +119,7 @@ struct CartView: View {
                                                 Image(systemName: "minus")
                                                     .font(.caption2.weight(.bold))
                                                     .foregroundColor(Theme.primary)
-                                                    .frame(width: 24, height: 24)
+                                                    .frame(width: 26, height: 26)
                                                     .background(Theme.primaryBg)
                                                     .clipShape(Circle())
                                             }
@@ -216,19 +133,21 @@ struct CartView: View {
                                                 Image(systemName: "plus")
                                                     .font(.caption2.weight(.bold))
                                                     .foregroundColor(.white)
-                                                    .frame(width: 24, height: 24)
+                                                    .frame(width: 26, height: 26)
                                                     .background(Theme.primary)
                                                     .clipShape(Circle())
                                             }
                                         }
+                                        .sensoryFeedback(.selection, trigger: item.quantity)
                                     }
                                     .padding(12)
-                                    .cardStyle()
+                                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 }
                             }
                             
                             // Delivery Slot Section
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: 10) {
                                 Text("Select Delivery Slot")
                                     .font(.headline.weight(.bold))
                                 
@@ -237,21 +156,23 @@ struct CartView: View {
                                         selectedDeliverySlot = idx
                                     } label: {
                                         HStack {
-                                            Image(systemName: selectedDeliverySlot == idx ? "largecircle.fill.circle" : "circle")
+                                            Image(systemName: selectedDeliverySlot == idx ? "checkmark.circle.fill" : "circle")
+                                                .font(.title3)
                                                 .foregroundColor(selectedDeliverySlot == idx ? Theme.primary : Theme.textMuted)
                                             Text(slots[idx])
                                                 .font(.subheadline)
                                                 .foregroundColor(Theme.textPrimary)
                                             Spacer()
                                         }
-                                        .padding(12)
-                                        .cardStyle()
+                                        .padding(14)
+                                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                                     }
                                 }
                             }
                             
                             // Order Summary
-                            VStack(spacing: 8) {
+                            VStack(spacing: 10) {
                                 Text("Order Summary")
                                     .font(.headline.weight(.bold))
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -268,27 +189,63 @@ struct CartView: View {
                                 
                                 SummaryRow(title: "Total Amount", value: "₹\(cartViewModel.grandTotal)", isBold: true)
                             }
-                            .padding(14)
-                            .cardStyle()
+                            .padding(16)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             
                             Button {
-                                // Proceed to checkout
+                                OrderManager.shared.placeOrder(
+                                    items: cartViewModel.items,
+                                    subtotal: cartViewModel.subtotal,
+                                    deliveryFee: cartViewModel.deliveryFee,
+                                    tax: cartViewModel.tax,
+                                    grandTotal: cartViewModel.grandTotal,
+                                    deliverySlot: slots[selectedDeliverySlot]
+                                )
+                                cartViewModel.clear()
+                                dismiss()
                             } label: {
-                                Text("Proceed to Checkout")
+                                Text("Place Order · ₹\(cartViewModel.grandTotal)")
                                     .font(.headline.weight(.bold))
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 14)
                                     .background(Theme.primary)
-                                    .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+                                    .clipShape(Capsule())
                             }
+                            .buttonStyle(.plain)
+                            .padding(.top, 4)
                         }
                         .padding(16)
                     }
                     .background(Color(uiColor: .systemGroupedBackground))
                 }
             }
-            .navigationBarHidden(true)
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("Your Cart")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color(uiColor: .systemGroupedBackground), for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Theme.textPrimary)
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Theme.textPrimary)
+                    }
+                }
+            }
         }
     }
     

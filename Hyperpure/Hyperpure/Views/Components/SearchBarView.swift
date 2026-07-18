@@ -10,7 +10,8 @@ struct SearchBarView: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(Theme.textMuted)
+                .foregroundColor(.secondary)
+                .font(.system(size: 16, weight: .medium))
             
             TextField(placeholder, text: $text)
                 .font(.body)
@@ -21,14 +22,15 @@ struct SearchBarView: View {
                     text = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(Theme.textMuted)
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 16))
                 }
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(Color(uiColor: .tertiarySystemFill))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 

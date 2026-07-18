@@ -106,7 +106,7 @@ struct ProductDetailView: View {
                                 .padding(.vertical, 14)
                                 .background(Theme.primary)
                                 .foregroundColor(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+                                .clipShape(Capsule())
                             }
                         }
                     }

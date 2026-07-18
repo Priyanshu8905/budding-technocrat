@@ -6,87 +6,69 @@ struct SmartListsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    // Video Banner (Screenshot 3)
-                    ZStack {
-                        RoundedRectangle(cornerRadius: Theme.radiusLg)
-                            .fill(Color(red: 215/255, green: 195/255, blue: 165/255))
-                            .frame(height: 180)
+                VStack(spacing: 18) {
+                    // Glass Hero Header Card
+                    VStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(LinearGradient(colors: [Theme.primary.opacity(0.15), Theme.primaryBg], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 56, height: 56)
+                            
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 26, weight: .bold))
+                                .foregroundColor(Theme.primary)
+                        }
                         
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Shopping list")
-                                    .font(.caption.weight(.bold))
-                                    .padding(4)
-                                    .background(Color.white.opacity(0.8))
-                                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                                Text("Potato .... 20kg")
-                                    .font(.caption2)
-                                Text("Onion .... 16kg")
-                                    .font(.caption2)
-                                Text("Paneer .... 5kg")
-                                    .font(.caption2)
-                            }
-                            .padding(.leading, 16)
+                        VStack(spacing: 4) {
+                            Text("Build Cart Instantly")
+                                .font(.title3.weight(.bold))
+                                .foregroundColor(Theme.textPrimary)
                             
-                            Spacer()
-                            
-                            // Play Button Icon
-                            ZStack {
-                                Circle()
-                                    .fill(Color.black.opacity(0.5))
-                                    .frame(width: 48, height: 48)
-                                Image(systemName: "play.fill")
-                                    .font(.title3)
-                                    .foregroundColor(.white)
-                            }
-                            
-                            Spacer()
+                            Text("Upload a photo or paste your ordering list, and AI will assemble your cart in seconds.")
+                                .font(.subheadline)
+                                .foregroundColor(Theme.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 16)
                         }
                     }
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 16)
+                    .frame(maxWidth: .infinity)
+                    .background(.regularMaterial)
+                    .background(Color.white.opacity(0.8))
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.9), Theme.primary.opacity(0.12)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
                     
-                    VStack(spacing: 4) {
-                        Text("INTRODUCING")
-                            .font(.caption2.weight(.bold))
-                            .tracking(2)
-                            .foregroundColor(Theme.textMuted)
-                        
-                        Text("Smart Lists")
-                            .font(.title.weight(.black))
-                            .foregroundColor(Theme.textPrimary)
-                        
-                        Text("Upload your ordering list and get a cart built instantly!")
-                            .font(.subheadline)
-                            .foregroundColor(Theme.textSecondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
-                    }
-                    .padding(.top, 4)
-                    
-                    Text("GET STARTED")
-                        .font(.caption2.weight(.bold))
-                        .tracking(3)
-                        .foregroundColor(Theme.textMuted)
-                    
-                    // Card 1: Upload Photo Card
+                    // Glass Action Card 1: Camera Upload
                     Button {
-                        // Photo upload
+                        // Photo upload action
                     } label: {
                         HStack(spacing: 14) {
                             ZStack {
                                 Circle()
-                                    .fill(Color(red: 254/255, green: 235/255, blue: 238/255))
-                                    .frame(width: 44, height: 44)
-                                Image(systemName: "camera.badge.ellipsis")
-                                    .font(.title3)
+                                    .fill(Theme.primaryBg)
+                                    .frame(width: 46, height: 46)
+                                Image(systemName: "camera.fill")
+                                    .font(.headline)
                                     .foregroundColor(Theme.primary)
                             }
                             
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Upload photos of your list")
+                                Text("Upload Photo of List")
                                     .font(.subheadline.weight(.bold))
                                     .foregroundColor(Theme.textPrimary)
-                                Text("jpeg & png files supported")
+                                Text("Handwritten notes, receipts, JPEG & PNG")
                                     .font(.caption)
                                     .foregroundColor(Theme.textMuted)
                             }
@@ -95,88 +77,155 @@ struct SmartListsView: View {
                             
                             Image(systemName: "chevron.right")
                                 .font(.caption.weight(.bold))
-                                .foregroundColor(Theme.textMuted)
+                                .foregroundColor(Theme.primary)
                         }
                         .padding(16)
-                        .hyperpureCardStyle()
+                        .background(.regularMaterial)
+                        .background(Color.white.opacity(0.85))
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.9), lineWidth: 1.2)
+                        )
+                        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
                     }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.impact(weight: .light), trigger: true)
                     
-                    Text("OR")
-                        .font(.caption2.weight(.bold))
-                        .foregroundColor(Theme.textMuted)
-                    
-                    // Card 2: Type/Paste Card
+                    // Glass Action Card 2: Text / Paste
                     Button {
-                        // Type or paste
+                        // Type or paste action
                     } label: {
                         HStack(spacing: 14) {
                             ZStack {
                                 Circle()
-                                    .fill(Color(red: 254/255, green: 235/255, blue: 238/255))
-                                    .frame(width: 44, height: 44)
-                                Image(systemName: "doc.plaintext")
-                                    .font(.title3)
-                                    .foregroundColor(Theme.primary)
+                                    .fill(Color.blue.opacity(0.08))
+                                    .frame(width: 46, height: 46)
+                                Image(systemName: "doc.text.fill")
+                                    .font(.headline)
+                                    .foregroundColor(Color.blue)
                             }
                             
-                            Text("Type in or paste your list here")
-                                .font(.subheadline.weight(.bold))
-                                .foregroundColor(Theme.textPrimary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Type or Paste List")
+                                    .font(.subheadline.weight(.bold))
+                                    .foregroundColor(Theme.textPrimary)
+                                Text("Paste text, WhatsApp items, or Excel notes")
+                                    .font(.caption)
+                                    .foregroundColor(Theme.textMuted)
+                            }
                             
                             Spacer()
                             
                             Image(systemName: "chevron.right")
                                 .font(.caption.weight(.bold))
-                                .foregroundColor(Theme.textMuted)
+                                .foregroundColor(Color.blue)
                         }
                         .padding(16)
-                        .hyperpureCardStyle()
+                        .background(.regularMaterial)
+                        .background(Color.white.opacity(0.85))
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.9), lineWidth: 1.2)
+                        )
+                        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
                     }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.impact(weight: .light), trigger: true)
                     
+                    // Upload Tips Button
                     Button {
                         // Upload tips
                     } label: {
-                        Text("Upload tips")
-                            .font(.subheadline.weight(.semibold))
-                            .underline()
-                            .foregroundColor(Theme.primary)
+                        HStack(spacing: 4) {
+                            Image(systemName: "lightbulb.fill")
+                                .font(.caption.weight(.bold))
+                                .foregroundColor(Theme.offer)
+                            Text("Tips for accurate list parsing")
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(Theme.textSecondary)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(.ultraThinMaterial)
+                        .background(Color.white.opacity(0.6))
+                        .clipShape(Capsule())
                     }
-                    .padding(.top, 8)
+                    .buttonStyle(.plain)
+                    .padding(.top, 4)
                     
+                    // Previous List Section
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Previous List")
-                            .font(.headline.weight(.bold))
+                        Text("Recent Smart List")
+                            .font(.subheadline.weight(.bold))
                             .foregroundColor(Theme.textPrimary)
                         
-                        HStack {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Theme.successLight)
+                                    .frame(width: 40, height: 40)
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.headline)
+                                    .foregroundColor(Theme.success)
+                            }
+                            
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("1 items • Text Processing")
+                                Text("Order Draft #1042")
                                     .font(.subheadline.weight(.bold))
-                                Text("View smart list >")
+                                    .foregroundColor(Theme.textPrimary)
+                                Text("3 items processed · 2 mins ago")
                                     .font(.caption)
                                     .foregroundColor(Theme.textMuted)
                             }
+                            
                             Spacer()
-                            Image(systemName: "trash")
-                                .font(.subheadline)
-                                .foregroundColor(Theme.textMuted)
+                            
+                            Button {
+                                // Delete recent list
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.subheadline)
+                                    .foregroundColor(Theme.textMuted)
+                                    .padding(8)
+                            }
+                            .sensoryFeedback(.impact(weight: .light), trigger: true)
                         }
                         .padding(14)
-                        .hyperpureCardStyle()
+                        .background(.regularMaterial)
+                        .background(Color.white.opacity(0.85))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color.white.opacity(0.9), lineWidth: 1)
+                        )
                     }
-                    .padding(.top, 12)
+                    .padding(.top, 8)
                 }
                 .padding(16)
             }
             .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("Smart Lists")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color(uiColor: .systemGroupedBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.title3.weight(.bold))
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Theme.textPrimary)
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Theme.textPrimary)
                     }
                 }

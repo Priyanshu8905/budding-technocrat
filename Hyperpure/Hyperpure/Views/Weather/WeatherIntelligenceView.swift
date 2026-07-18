@@ -168,7 +168,7 @@ struct WeatherIntelligenceView: View {
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
                                     .background(Theme.primary)
-                                    .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+                                    .clipShape(Capsule())
                             }
                             .padding(.top, 8)
                         }

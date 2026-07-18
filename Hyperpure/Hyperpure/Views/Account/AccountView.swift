@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct AccountView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var isVegModeOn = false
     
     var body: some View {
@@ -157,6 +158,7 @@ struct AccountView: View {
             .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .presentationDragIndicator(.visible)
     }
 }
 

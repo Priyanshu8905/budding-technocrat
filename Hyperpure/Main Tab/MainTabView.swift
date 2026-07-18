@@ -2,8 +2,11 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var appState = AppState.shared
+    @State private var myListViewModel = MyListViewModel.shared
     @State private var isSmartListsPresented = false
     @State private var isCartPresented = false
+    @State private var isAccountPresented = false
+    @State private var selectedCategoryId: String? = nil
     @Environment(CartViewModel.self) private var cartViewModel
     
     var body: some View {
@@ -11,13 +14,16 @@ struct MainTabView: View {
         TabView(selection: $appState.selectedTab) {
             HomeView(
                 onNavigateToCategory: { categoryId in
-                    // Navigate action
+                    selectedCategoryId = categoryId
                 },
                 onOpenSmartLists: {
                     isSmartListsPresented = true
                 },
                 onOpenCart: {
                     isCartPresented = true
+                },
+                onOpenAccount: {
+                    isAccountPresented = true
                 }
             )
             .tabItem {
@@ -36,7 +42,7 @@ struct MainTabView: View {
             .tabItem {
                 Label("My list", systemImage: "heart.fill")
             }
-            .badge("NEW")
+            .badge(myListViewModel.hasNewItems ? "NEW" : nil)
             .tag(1)
             
             OrdersView(
@@ -49,24 +55,34 @@ struct MainTabView: View {
             }
             .tag(2)
             
-            AccountView()
-                .tabItem {
-                    Label("Account", systemImage: "person.fill")
-                }
-                .tag(3)
-            
             SmartPantryView()
                 .tabItem {
                     Label("Pantry", systemImage: "archivebox.fill")
                 }
-                .tag(4)
+                .tag(3)
         }
         .tint(Theme.primary)
+        .onChange(of: appState.selectedTab) { _, newTab in
+            if newTab == 1 {
+                myListViewModel.markAsSeen()
+            }
+        }
         .sheet(isPresented: $isSmartListsPresented) {
             SmartListsView()
         }
         .sheet(isPresented: $isCartPresented) {
             CartView()
+        }
+        .sheet(isPresented: $isAccountPresented) {
+            AccountView()
+        }
+        .sheet(isPresented: Binding(
+            get: { selectedCategoryId != nil },
+            set: { if !$0 { selectedCategoryId = nil } }
+        )) {
+            if let categoryId = selectedCategoryId {
+                CatalogueView(initialCategoryId: categoryId)
+            }
         }
     }
 }
