@@ -1,3 +1,6 @@
+// ToastView.swift
+// Temporary popup notification displaying success or status messages.
+
 import SwiftUI
 
 struct ToastView: View {
@@ -18,4 +21,8 @@ struct ToastView: View {
         .clipShape(Capsule())
         .shadow(radius: 8)
     }
+}
+
+#Preview {
+    ToastView(message: "Item added to cart", iconName: "cart.badge.plus")
 }

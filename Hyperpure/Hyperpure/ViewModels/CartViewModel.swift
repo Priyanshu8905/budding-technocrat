@@ -1,8 +1,14 @@
+// CartViewModel.swift
+// ViewModel managing the state and operations of the shopping cart.
+
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 final class CartViewModel {
+    static let shared = CartViewModel()
+    
     private(set) var items: [CartItem] = []
     
     var totalItems: Int {

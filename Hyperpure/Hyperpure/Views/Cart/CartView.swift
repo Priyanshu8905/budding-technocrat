@@ -135,9 +135,43 @@ struct CartView: View {
                     }
                     .background(Color(uiColor: .systemGroupedBackground))
                 } else {
-                    // Filled Cart State
                     ScrollView {
                         VStack(spacing: 16) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("☔ Monsoon Sourcing Alert")
+                                            .font(.subheadline.weight(.bold))
+                                            .foregroundColor(Theme.textPrimary)
+                                        Text("Increase order volumes by 20% to safeguard against transit delays.")
+                                            .font(.caption)
+                                            .foregroundColor(Theme.textSecondary)
+                                    }
+                                    Spacer()
+                                    Button {
+                                        for item in cartViewModel.items {
+                                            let bufferQty = Int(ceil(Double(item.quantity) * 1.2))
+                                            cartViewModel.updateQuantity(for: item.product, quantity: bufferQty)
+                                        }
+                                    } label: {
+                                        Text("Apply Buffer")
+                                            .font(.caption.weight(.bold))
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Theme.primary)
+                                            .clipShape(Capsule())
+                                    }
+                                }
+                            }
+                            .padding(12)
+                            .background(Theme.primary.opacity(0.06))
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.radiusMd)
+                                    .stroke(Theme.primary.opacity(0.15), lineWidth: 1)
+                            )
+                            
                             VStack(spacing: 12) {
                                 ForEach(cartViewModel.items) { item in
                                     HStack(spacing: 12) {

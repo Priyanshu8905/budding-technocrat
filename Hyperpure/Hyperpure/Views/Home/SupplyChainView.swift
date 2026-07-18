@@ -1,3 +1,6 @@
+// SupplyChainView.swift
+// Informational card illustrating the farm-to-kitchen supply chain.
+
 import SwiftUI
 
 struct SupplyChainView: View {
@@ -43,4 +46,8 @@ struct SupplyChainView: View {
         .background(Theme.bgDark)
         .clipShape(RoundedRectangle(cornerRadius: Theme.radiusLg))
     }
+}
+
+#Preview {
+    SupplyChainView(steps: MockContent.supplyChainSteps)
 }

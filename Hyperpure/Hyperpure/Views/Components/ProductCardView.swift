@@ -1,3 +1,6 @@
+// ProductCardView.swift
+// Component presenting individual product details with add-to-cart controls.
+
 import SwiftUI
 
 struct ProductCardView: View {
@@ -6,7 +9,6 @@ struct ProductCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Image / Emoji Placeholder
             ZStack(alignment: .topTrailing) {
                 RoundedRectangle(cornerRadius: Theme.radiusMd)
                     .fill(Color(uiColor: .tertiarySystemGroupedBackground))
@@ -100,12 +102,7 @@ struct ProductCardView: View {
             .padding(.bottom, 8)
         }
         .padding(6)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.radiusMd)
-                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
-        )
+        .hyperpureCardStyle()
     }
     
     private func categoryEmoji(for categoryId: String) -> String {
@@ -115,5 +112,5 @@ struct ProductCardView: View {
 
 #Preview {
     ProductCardView(product: MockProducts.products[0])
-        .environment(CartViewModel())
+        .environment(CartViewModel.shared)
 }

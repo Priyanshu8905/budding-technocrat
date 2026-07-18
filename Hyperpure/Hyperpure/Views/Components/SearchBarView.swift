@@ -1,3 +1,6 @@
+// SearchBarView.swift
+// Text input view for filtering products and categories.
+
 import SwiftUI
 
 struct SearchBarView: View {
@@ -27,4 +30,9 @@ struct SearchBarView: View {
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd))
     }
+}
+
+#Preview {
+    @Previewable @State var text = ""
+    SearchBarView(text: $text)
 }
