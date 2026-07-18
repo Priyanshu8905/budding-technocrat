@@ -116,8 +116,12 @@ struct OrderConfirmationView: View {
                             }
                         }
                         .padding(16)
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(Theme.radiusMd)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                        )
                         .shadow(color: Color.black.opacity(0.02), radius: 8, x: 0, y: 4)
                         .padding(.horizontal)
                         
@@ -139,8 +143,12 @@ struct OrderConfirmationView: View {
                                     .lineSpacing(4)
                             }
                             .padding(16)
-                            .background(Color(uiColor: .systemBackground))
-                            .cornerRadius(Theme.radiusMd)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                    .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                            )
                             .padding(.horizontal)
                             .transition(.opacity)
                         }
@@ -159,9 +167,9 @@ struct OrderConfirmationView: View {
                                 .font(.headline.bold())
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding()
+                                .padding(.vertical, 14)
                                 .background(Theme.primary)
-                                .cornerRadius(Theme.radiusMd)
+                                .clipShape(Capsule())
                         }
                         .padding()
                         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -222,7 +230,7 @@ struct OrderConfirmationView: View {
                                 .padding(.vertical, 12)
                                 .frame(maxWidth: .infinity)
                                 .background(Theme.primaryBg)
-                                .cornerRadius(10)
+                                .clipShape(Capsule())
                             }
                             .buttonStyle(.plain)
                             
@@ -235,17 +243,17 @@ struct OrderConfirmationView: View {
                                     .padding(.vertical, 12)
                                     .frame(maxWidth: .infinity)
                                     .background(Color.red)
-                                    .cornerRadius(10)
+                                    .clipShape(Capsule())
                             }
                             .buttonStyle(.plain)
                         }
                     }
                     .padding(16)
                     .background(.ultraThinMaterial)
-                    .cornerRadius(20)
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                     )
                     .padding(.horizontal)
                     .padding(.bottom, 20)
@@ -413,8 +421,12 @@ struct SourcingMapView: View {
             }
         }
         .padding(16)
-        .background(Color(uiColor: .systemBackground))
-        .cornerRadius(Theme.radiusMd)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+        )
         .padding(.horizontal)
         .onAppear {
             startCourierSimulation()

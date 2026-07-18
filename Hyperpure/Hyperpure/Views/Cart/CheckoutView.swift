@@ -32,30 +32,6 @@ struct CheckoutView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Custom Navigation Header
-                HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .bold()
-                            Text("Cart")
-                        }
-                        .foregroundColor(Theme.primary)
-                    }
-                    Spacer()
-                    Text("Secure Checkout")
-                        .font(.headline)
-                        .foregroundColor(Theme.textPrimary)
-                    Spacer()
-                    // Spacer to balance back button
-                    Text("Back")
-                        .foregroundColor(.clear)
-                }
-                .padding()
-                .background(Color(uiColor: .systemBackground))
-                
                 ScrollView {
                     VStack(spacing: 20) {
                         // Order details Summary Card
@@ -88,10 +64,14 @@ struct CheckoutView: View {
                                     .foregroundColor(Theme.primary)
                             }
                         }
-                        .padding()
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(Theme.radiusMd)
-                        .padding(.horizontal)
+                        .padding(16)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
                         
                         // Delivery Outpost Address Card
                         VStack(alignment: .leading, spacing: 10) {
@@ -112,12 +92,18 @@ struct CheckoutView: View {
                                         .font(.caption)
                                         .foregroundColor(Theme.textSecondary)
                                 }
+                                
+                                Spacer()
                             }
                         }
-                        .padding()
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(Theme.radiusMd)
-                        .padding(.horizontal)
+                        .padding(16)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
                         
                         // Payment Method Selection Card
                         VStack(alignment: .leading, spacing: 14) {
@@ -149,17 +135,21 @@ struct CheckoutView: View {
                             }
                             .buttonStyle(.plain)
                         }
-                        .padding()
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(Theme.radiusMd)
-                        .padding(.horizontal)
+                        .padding(16)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
                         
                         Spacer()
                     }
                     .padding(.vertical)
                 }
                 
-                // Confirm Bottom Action
+                // Confirm Bottom Action Button (Capsule shaped)
                 VStack {
                     Button {
                         processFulfillment()
@@ -168,13 +158,13 @@ struct CheckoutView: View {
                             .font(.headline.bold())
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
-                            .padding()
+                            .padding(.vertical, 14)
                             .background(Theme.primary)
-                            .cornerRadius(Theme.radiusMd)
+                            .clipShape(Capsule())
                     }
-                    .padding()
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                 }
-                .background(Color(uiColor: .systemBackground))
             }
             
             // Full Screen Overlay for Payment / Grace Period states
@@ -182,7 +172,30 @@ struct CheckoutView: View {
                 overlayStateView()
             }
         }
-        .navigationBarHidden(true)
+        .navigationTitle("Secure Checkout")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
+                }
+            }
+            
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    processFulfillment()
+                } label: {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Theme.textPrimary)
+                }
+            }
+        }
         .navigationDestination(isPresented: $navigateToConfirmation) {
             OrderConfirmationView(
                 orderID: orderID,
