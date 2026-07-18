@@ -456,13 +456,13 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
         )
 
         AppShortcut(
-            intent: ExecuteVoiceProcurementIntent(),
+            intent: PlaceProcurementOrderIntent(),
             phrases: [
                 "Process my kitchen order inside \(.applicationName)",
-                "Run voice procurement using \(.applicationName)",
-                "Restock ingredients via \(.applicationName)"
+                "Place my kitchen order inside \(.applicationName)",
+                "Start checkout workflow in \(.applicationName)"
             ],
-            shortTitle: "Voice procurement",
+            shortTitle: "Place kitchen order",
             systemImageName: "chefhat"
         )
 
@@ -478,14 +478,14 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
         )
 
         AppShortcut(
-            intent: InitiateCheckoutWorkflowIntent(),
+            intent: GetKitchenInsightsIntent(),
             phrases: [
-                "Checkout my cart inside \(.applicationName)",
-                "Start checkout workflow in \(.applicationName)",
-                "Checkout my Hyperpure cart using \(.applicationName)"
+                "Show weather suggestions in \(.applicationName)",
+                "Get kitchen insights inside \(.applicationName)",
+                "Show my kitchen insights in \(.applicationName)"
             ],
-            shortTitle: "Checkout cart",
-            systemImageName: "cart.fill"
+            shortTitle: "Kitchen Insights",
+            systemImageName: "cloud.rain.fill"
         )
     }
 }

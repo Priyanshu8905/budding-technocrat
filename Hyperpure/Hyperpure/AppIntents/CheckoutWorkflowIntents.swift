@@ -1,5 +1,5 @@
 // CheckoutWorkflowIntents.swift
-// Transactional checkout grace-period state machine and Siri checkout intents.
+// Complete 5-step transactional checkout grace period, Siri voice ordering, and Live Activity launcher.
 
 import Foundation
 import AppIntents
@@ -60,6 +60,7 @@ public class CheckoutManager {
                 content: ActivityContent(state: initialContentState, staleDate: nil),
                 pushType: nil
             )
+            postLocalNotification(title: "Order Finalized", body: "Sourcing pipeline locked in. Delivery tracking active.")
         } catch {
             print("Failed to start Live Activity: \(error.localizedDescription)")
         }
@@ -85,34 +86,46 @@ public class CheckoutManager {
                 currentStatus: step,
                 estimatedArrival: Date()
             )
+            postLocalNotification(title: "Courier Arrived", body: "Consignment successfully delivered to your restaurant dock!")
         } else {
             updatedState = DeliveryTrackingAttributes.ContentState(
                 currentStatus: step,
                 estimatedArrival: Date().addingTimeInterval(900)
             )
+            if step == .partnerAssigned {
+                postLocalNotification(title: "Courier Assigned", body: "Delivery partner is loading consignment at warehouse.")
+            } else if step == .dispatched {
+                postLocalNotification(title: "Consignment Dispatched", body: "Logistics partner has departed warehouse hub.")
+            }
         }
         
         await activity.update(using: updatedState)
     }
 }
 
-struct CancelCheckoutIntent: AppIntent {
-    static var title: LocalizedStringResource = "Cancel Active Checkout"
-    static var description = IntentDescription("Abort the active checkout grace period and restore cart parameters.")
+// MARK: - App Intents
+
+struct GetKitchenInsightsIntent: AppIntent {
+    static var title: LocalizedStringResource = "Get Kitchen Sourcing Insights"
+    static var description = IntentDescription("Fetches simulated severe weather conditions and recommends procurement actions.")
     static var openAppWhenRun: Bool = false
     
     init() {}
     
     @MainActor
-    func perform() async throws -> some IntentResult & ProvidesDialog {
-        CheckoutManager.shared.cancelCheckout()
-        return .result(dialog: IntentDialog("Checkout aborted. Your cart configuration has been fully restored."))
+    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        let dialogue = IntentDialog("Heavy monsoon downpours detected in your area. supply chain transit time is increased by forty-five minutes. I recommend scaling up flour and potato stocks by fifteen percent to buffer against logistical delays.")
+        
+        return .result(
+            dialog: dialogue,
+            view: KitchenInsightsSnippetView()
+        )
     }
 }
 
-struct InitiateCheckoutWorkflowIntent: AppIntent {
-    static var title: LocalizedStringResource = "Checkout my Hyperpure cart"
-    static var description = IntentDescription("Secures order and triggers a 30-second modification grace window.")
+struct PlaceProcurementOrderIntent: AppIntent {
+    static var title: LocalizedStringResource = "Place Procurement Order"
+    static var description = IntentDescription("Processes the local cart and transitions the state machine to the checkout grace window.")
     static var openAppWhenRun: Bool = false
     
     init() {}
@@ -121,11 +134,75 @@ struct InitiateCheckoutWorkflowIntent: AppIntent {
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
         CheckoutManager.shared.startCheckout()
         
-        let dialog = IntentDialog("Checkout initiated. You have a 30-second window to alter or cancel your configuration right on your screen before logistics lock in.")
+        let dialog = IntentDialog("Order received. Starting your thirty-second modification grace window. You can cancel or edit the items right from your screen before dispatch logs freeze.")
         
         return .result(
             dialog: dialog,
             view: CheckoutGracePeriodSnippetView()
+        )
+    }
+}
+
+// MARK: - Snippet Views
+
+struct KitchenInsightsSnippetView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "cloud.rain.fill")
+                    .foregroundColor(.blue)
+                    .font(.title2)
+                Text("Monsoon Alert Active")
+                    .font(.headline)
+                    .foregroundColor(Theme.textPrimary)
+                Spacer()
+                Text("Heavy Rain")
+                    .font(.caption.bold())
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.blue)
+                    .cornerRadius(8)
+            }
+            
+            Text("Supply chain transit time is increased by 45 minutes due to flooded roadways. Sourcing pipelines are currently constrained.")
+                .font(.caption)
+                .foregroundColor(Theme.textSecondary)
+                .lineSpacing(2)
+            
+            Divider()
+                .background(Color.primary.opacity(0.1))
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text("RECOMMENDED ADJUSTMENTS:")
+                    .font(.caption2.bold())
+                    .foregroundColor(Theme.textMuted)
+                
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .foregroundColor(.green)
+                    Text("Scale up Flour & Potato stocks by 15%")
+                        .font(.subheadline.bold())
+                        .foregroundColor(Theme.textPrimary)
+                }
+            }
+            
+            Button(intent: PlaceProcurementOrderIntent()) {
+                Text("Place Order (Apply Buffers)")
+                    .font(.subheadline.bold())
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(Theme.primary)
+                    .cornerRadius(10)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(16)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
     }
 }
@@ -135,13 +212,13 @@ struct CheckoutGracePeriodSnippetView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            // Header Row
+            // Header
             HStack {
-                Text("HYPERPURE SECURE CHECKOUT")
+                Text("SECURE OUTPOST CHECKOUT")
                     .font(.system(.caption, design: .rounded).weight(.heavy))
                     .foregroundColor(Theme.primary)
                 Spacer()
-                Image(systemName: "lock.shield.fill")
+                Image(systemName: "clock.badge.checkmark.fill")
                     .foregroundColor(Theme.primary)
             }
             
@@ -151,55 +228,48 @@ struct CheckoutGracePeriodSnippetView: View {
             switch checkoutManager.state {
             case .gracePeriodActive(let seconds):
                 VStack(spacing: 14) {
-                    // Circular Progress Rings
+                    // Ring
                     ZStack {
                         Circle()
                             .stroke(Color.primary.opacity(0.06), lineWidth: 8)
-                            .frame(width: 90, height: 90)
+                            .frame(width: 80, height: 80)
                         
                         Circle()
                             .trim(from: 0.0, to: CGFloat(seconds) / 30.0)
                             .stroke(Theme.primary, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                            .frame(width: 90, height: 90)
+                            .frame(width: 80, height: 80)
                             .rotationEffect(.degrees(-90))
                             .animation(.linear(duration: 0.2), value: seconds)
                         
-                        VStack(spacing: 2) {
-                            Text("\(seconds)s")
-                                .font(.system(.title3, design: .rounded).weight(.bold))
-                                .foregroundColor(Theme.textPrimary)
-                            Text("Grace Left")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundColor(Theme.textMuted)
-                        }
+                        Text("\(seconds)s")
+                            .font(.system(.title3, design: .rounded).weight(.bold))
+                            .foregroundColor(Theme.textPrimary)
                     }
-                    .padding(.vertical, 4)
                     
-                    Text("Delivery Outpost coordinates mapping. Sourcing pipelines will lock automatically after timer elapses.")
-                        .font(.caption)
-                        .foregroundColor(Theme.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(2)
+                    Text("Locking order in: 00:\(seconds, specifier: "%02d")")
+                        .font(.subheadline.bold())
+                        .foregroundColor(Theme.textPrimary)
                     
-                    // Buttons
                     HStack(spacing: 10) {
                         Button(intent: CancelCheckoutIntent()) {
                             Text("Cancel Order")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.caption.bold())
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
-                                .background(Color.red, in: RoundedRectangle(cornerRadius: 10))
+                                .background(Color.red)
+                                .cornerRadius(8)
                         }
                         .buttonStyle(.plain)
                         
                         Button(intent: CancelCheckoutIntent()) {
                             Text("Add More Items")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.caption.bold())
                                 .foregroundColor(Theme.primary)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
-                                .background(Theme.primaryBg, in: RoundedRectangle(cornerRadius: 10))
+                                .background(Theme.primaryBg)
+                                .cornerRadius(8)
                         }
                         .buttonStyle(.plain)
                     }
@@ -208,49 +278,55 @@ struct CheckoutGracePeriodSnippetView: View {
             case .orderLocked:
                 VStack(spacing: 10) {
                     Image(systemName: "lock.fill")
-                        .font(.largeTitle)
+                        .font(.title)
                         .foregroundColor(.green)
                     
-                    Text("Order Locked")
+                    Text("Order Finalized & Frozen")
                         .font(.headline)
                         .foregroundColor(Theme.textPrimary)
                     
-                    Text("Sourcing channels locked in. Delivery logistics allocating partner.")
+                    Text("Consignment locked. Live Tracking active on your Lock Screen.")
                         .font(.caption)
                         .foregroundColor(Theme.textSecondary)
                         .multilineTextAlignment(.center)
                 }
-                .padding(.vertical, 10)
                 
             case .dispatched:
                 VStack(spacing: 10) {
                     Image(systemName: "truck.box.fill")
-                        .font(.largeTitle)
+                        .font(.title)
                         .foregroundColor(Theme.primary)
                     
-                    Text("Fulfillment Dispatched")
+                    Text("Consignment Dispatched")
                         .font(.headline)
                         .foregroundColor(Theme.textPrimary)
-                    
-                    Text("Courier has left the outpost and is en route to your kitchen.")
-                        .font(.caption)
-                        .foregroundColor(Theme.textSecondary)
-                        .multilineTextAlignment(.center)
                 }
-                .padding(.vertical, 10)
                 
             case .idle:
                 Text("No active checkout session.")
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundColor(Theme.textMuted)
             }
         }
         .padding(16)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
-        .padding(.horizontal, 4)
+    }
+}
+
+struct CancelCheckoutIntent: AppIntent {
+    static var title: LocalizedStringResource = "Cancel Checkout"
+    static var description = IntentDescription("Cancels the active checkout session and reverts to cart.")
+    static var openAppWhenRun: Bool = false
+    
+    init() {}
+    
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        CheckoutManager.shared.cancelCheckout()
+        return .result()
     }
 }

@@ -209,38 +209,3 @@ struct DeliveryTrackingLockScreenView: View {
         }
     }
 }
-
-struct PlaceProcurementOrderIntent: AppIntent {
-    static var title: LocalizedStringResource = "Place Procurement Order"
-    static var description = IntentDescription("Checkout items inside your cart and launch a live lock screen delivery tracker.")
-    static var openAppWhenRun: Bool = false
-    
-    init() {}
-    
-    @MainActor
-    func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            return .result(dialog: IntentDialog("Order secured, but Live Activities are disabled in your iOS settings. Please enable them for Hyperpure under Settings to view lock screen widgets."))
-        }
-        
-        let orderId = "#HP-" + String((1000...9999).randomElement() ?? 5024)
-        
-        let attributes = DeliveryTrackingAttributes(orderID: orderId, merchantName: "Hyperpure Wholesale")
-        
-        let initialContentState = DeliveryTrackingAttributes.ContentState(
-            currentStatus: .placed,
-            estimatedArrival: Date().addingTimeInterval(1800) // 30 mins
-        )
-        
-        do {
-            let activity = try Activity<DeliveryTrackingAttributes>.request(
-                attributes: attributes,
-                content: ActivityContent(state: initialContentState, staleDate: nil),
-                pushType: nil
-            )
-            return .result(dialog: IntentDialog("Order secured. Live tracking activity requested successfully with ID \(activity.id)."))
-        } catch {
-            return .result(dialog: IntentDialog("Activity request failed with error: \(error.localizedDescription)"))
-        }
-    }
-}
