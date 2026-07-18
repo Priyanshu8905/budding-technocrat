@@ -76,17 +76,25 @@ struct AddPantryItemView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Theme.textPrimary)
                     }
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button {
                         if !name.isEmpty && quantity > 0 && depletionRate > 0 {
                             onAdd(name, category, quantity, unit, shelfLife, depletionRate)
                             dismiss()
                         }
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Theme.textPrimary)
                     }
                 }
             }

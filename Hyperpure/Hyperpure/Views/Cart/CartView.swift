@@ -142,7 +142,7 @@ struct CartView: View {
                                     }
                                     .padding(12)
                                     .background(Color(uiColor: .secondarySystemGroupedBackground))
-                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                                 }
                             }
                             
@@ -191,7 +191,7 @@ struct CartView: View {
                             }
                             .padding(16)
                             .background(Color(uiColor: .secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                             
                             NavigationLink(destination: CheckoutView()) {
                                 Text("Proceed to Checkout")

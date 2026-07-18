@@ -99,11 +99,11 @@ struct SmartPantryView: View {
                         .padding(.top, 14)
                         .padding(.bottom, 4)
                         
+                        // Filter Pills (below search bar)
+                        filterPillsRow
+                        
                         // Kitchen Status Card
                         healthHeaderCard
-                        
-                        // Filter Pills
-                        filterPillsRow
                         
                         // Depletion Chart (if item selected)
                         if let item = selectedItem {
@@ -191,7 +191,7 @@ struct SmartPantryView: View {
         }
         .padding(14)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
         .padding(.horizontal, 16)
     }
@@ -339,7 +339,7 @@ struct SmartPantryView: View {
         }
         .padding(14)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
         .padding(.horizontal, 16)
     }
@@ -432,7 +432,7 @@ struct SmartPantryView: View {
                 .padding(14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
                 .padding(.horizontal, 16)
             } else {
@@ -492,7 +492,7 @@ struct SmartPantryView: View {
                     .padding(14)
                 }
                 .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
                 .padding(.horizontal, 16)
             }
@@ -598,9 +598,9 @@ struct PantryRowItem: View {
             }
             .padding(12)
             .background(isSelected ? statusColor(for: item.status).opacity(0.04) : Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .stroke(isSelected ? statusColor(for: item.status).opacity(0.3) : Color.clear, lineWidth: 1.5)
             )
             .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)

@@ -294,7 +294,7 @@ struct MyListView: View {
                             }
                             .padding(14)
                             .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                             .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
                             .padding(.horizontal, 16)
                             .padding(.bottom, 4)
@@ -453,7 +453,7 @@ struct MyListRowItem: View {
         }
         .padding(12)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
     }
     

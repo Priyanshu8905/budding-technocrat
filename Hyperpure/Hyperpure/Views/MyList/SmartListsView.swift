@@ -195,9 +195,9 @@ struct SmartListsView: View {
                         .padding(14)
                         .background(.regularMaterial)
                         .background(Color.white.opacity(0.85))
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
                                 .stroke(Color.white.opacity(0.9), lineWidth: 1)
                         )
                     }

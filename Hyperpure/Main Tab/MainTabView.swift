@@ -12,54 +12,46 @@ struct MainTabView: View {
     var body: some View {
         @Bindable var appState = appState
         TabView(selection: $appState.selectedTab) {
-            HomeView(
-                onNavigateToCategory: { categoryId in
-                    selectedCategoryId = categoryId
-                },
-                onOpenSmartLists: {
-                    isSmartListsPresented = true
-                },
-                onOpenCart: {
-                    isCartPresented = true
-                },
-                onOpenAccount: {
-                    isAccountPresented = true
-                }
-            )
-            .tabItem {
-                Label("Shop", systemImage: "basket.fill")
+            Tab("Shop", systemImage: "basket.fill", value: 0) {
+                HomeView(
+                    onNavigateToCategory: { categoryId in
+                        selectedCategoryId = categoryId
+                    },
+                    onOpenSmartLists: {
+                        isSmartListsPresented = true
+                    },
+                    onOpenCart: {
+                        isCartPresented = true
+                    },
+                    onOpenAccount: {
+                        isAccountPresented = true
+                    }
+                )
             }
-            .tag(0)
             
-            MyListView(
-                onStartShopping: {
-                    appState.selectedTab = 0
-                },
-                onOpenCart: {
-                    isCartPresented = true
-                }
-            )
-            .tabItem {
-                Label("My list", systemImage: "heart.fill")
+            Tab("My list", systemImage: "heart.fill", value: 1) {
+                MyListView(
+                    onStartShopping: {
+                        appState.selectedTab = 0
+                    },
+                    onOpenCart: {
+                        isCartPresented = true
+                    }
+                )
             }
-            .badge(myListViewModel.hasNewItems ? "NEW" : nil)
-            .tag(1)
+            .badge(myListViewModel.hasNewItems ? Text("NEW") : nil)
             
-            OrdersView(
-                onStartShopping: {
-                    appState.selectedTab = 0
-                }
-            )
-            .tabItem {
-                Label("Orders", systemImage: "bag.fill")
+            Tab("Orders", systemImage: "bag.fill", value: 2) {
+                OrdersView(
+                    onStartShopping: {
+                        appState.selectedTab = 0
+                    }
+                )
             }
-            .tag(2)
             
-            SmartPantryView()
-                .tabItem {
-                    Label("Pantry", systemImage: "archivebox.fill")
-                }
-                .tag(3)
+            Tab("Pantry", systemImage: "archivebox.fill", value: 3) {
+                SmartPantryView()
+            }
         }
         .tint(Theme.primary)
         .onChange(of: appState.selectedTab) { _, newTab in

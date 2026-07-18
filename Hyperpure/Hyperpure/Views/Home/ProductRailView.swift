@@ -154,6 +154,7 @@ struct ProductCardRailItem: View {
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 }
             }
+            .frame(height: 20, alignment: .leading)
             
             // Title
             Text(product.name)
@@ -176,8 +177,9 @@ struct ProductCardRailItem: View {
                         .foregroundColor(Theme.textMuted)
                 }
             }
+            .frame(height: 14, alignment: .leading)
             
-            // Price & ADD Button Row (Positioned at appropriate distance below image card)
+            // Price & ADD Button Row
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 2) {
                     if product.discountPercent > 0 {
@@ -205,10 +207,11 @@ struct ProductCardRailItem: View {
                             .foregroundColor(Theme.bestRateBlue)
                     }
                 }
+                .frame(height: 50, alignment: .bottomLeading)
                 
                 Spacer()
                 
-                // ADD / Stepper Button (Clean glass pill, no extra minQty text)
+                // ADD / Stepper Button
                 let qty = cartViewModel.quantity(for: product)
                 if qty > 0 {
                     HStack(spacing: 6) {
