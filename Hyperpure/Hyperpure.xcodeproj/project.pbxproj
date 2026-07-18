@@ -91,6 +91,14 @@
 		B71802CCAD8347D2904442BF /* CategoryGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CategoryGridView.swift; path = Hyperpure/Views/Home/CategoryGridView.swift; sourceTree = "<group>"; };
 		C0723936300BBBC4006722AC /* HyperPureSiriIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperPureSiriIntents.swift; sourceTree = "<group>"; };
 		C072393A300BE04A006722AC /* Hyperpure.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Hyperpure.entitlements; path = Hyperpure/Hyperpure.entitlements; sourceTree = "<group>"; };
+		C0723942300BE52F006722AC /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
+		C0723943300BE554006722AC /* WeatherKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WeatherKit.framework; path = System/Library/Frameworks/WeatherKit.framework; sourceTree = SDKROOT; };
+		C0723944300BE59C006722AC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		C0723945300BE59C006722AC /* FoundationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FoundationModels.framework; path = System/Library/Frameworks/FoundationModels.framework; sourceTree = SDKROOT; };
+		C0723946300BE5A9006722AC /* Speech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speech.framework; path = System/Library/Frameworks/Speech.framework; sourceTree = SDKROOT; };
+		C0723947300BE5C6006722AC /* SwiftData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftData.framework; path = System/Library/Frameworks/SwiftData.framework; sourceTree = SDKROOT; };
+		C0723948300BE5DD006722AC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		C0723949300BE5F4006722AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = Hyperpure/Info.plist; sourceTree = "<group>"; };
 		CE58B64873144B83B528F23B /* CatalogueViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CatalogueViewModel.swift; path = Hyperpure/ViewModels/CatalogueViewModel.swift; sourceTree = "<group>"; };
 		CFA050FB0F934D41B3C41502 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = Hyperpure/Models/AppState.swift; sourceTree = "<group>"; };
 		D1D0C150613442D29D224253 /* MockContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MockContent.swift; path = Hyperpure/Data/MockContent.swift; sourceTree = "<group>"; };
@@ -205,12 +213,14 @@
 		7DB20081DE73403BBE31A211 = {
 			isa = PBXGroup;
 			children = (
+				C0723949300BE5F4006722AC /* Info.plist */,
 				C072393A300BE04A006722AC /* Hyperpure.entitlements */,
 				747718436FED4CA4B932A79B /* App */,
 				D8171C5B05A14D13A625D7C3 /* Models */,
 				3884D708A5CD46C9BEEAEB39 /* Data */,
 				A9F17AB119D940678E6ABED2 /* ViewModels */,
 				140FD2E4688B4BDD8B893941 /* Views */,
+				C0723941300BE52E006722AC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -251,6 +261,20 @@
 				70261EE11E0A47C48CCDC3FC /* CatalogueView.swift */,
 			);
 			name = Catalogue;
+			sourceTree = "<group>";
+		};
+		C0723941300BE52E006722AC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C0723948300BE5DD006722AC /* AVFoundation.framework */,
+				C0723947300BE5C6006722AC /* SwiftData.framework */,
+				C0723946300BE5A9006722AC /* Speech.framework */,
+				C0723944300BE59C006722AC /* Foundation.framework */,
+				C0723945300BE59C006722AC /* FoundationModels.framework */,
+				C0723943300BE554006722AC /* WeatherKit.framework */,
+				C0723942300BE52F006722AC /* AppIntents.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		CD4A0E860FC24967967AEC3F /* Quality */ = {
@@ -443,10 +467,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73B8W4ZN6V;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Hyperpure/Info.plist;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -468,10 +495,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73B8W4ZN6V;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Hyperpure/Info.plist;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
