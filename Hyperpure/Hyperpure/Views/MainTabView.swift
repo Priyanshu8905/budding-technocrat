@@ -53,6 +53,12 @@ struct MainTabView: View {
                     Label("Account", systemImage: "person.fill")
                 }
                 .tag(3)
+            
+            SmartPantryView()
+                .tabItem {
+                    Label("Pantry", systemImage: "archivebox.fill")
+                }
+                .tag(4)
         }
         .tint(Theme.primary)
         .sheet(isPresented: $isSmartListsPresented) {
@@ -66,5 +72,6 @@ struct MainTabView: View {
 
 #Preview {
     MainTabView()
-        .environment(CartViewModel())
+        .environment(CartViewModel.shared)
+        .modelContainer(for: PantryItem.self, inMemory: true)
 }

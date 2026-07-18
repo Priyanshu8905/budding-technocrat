@@ -1,16 +1,10 @@
-//
-//  HyperPureSiriIntents.swift
-//  Hyperpure
-//
-//  Created by Kaushiki Rai on 18/07/26.
-//
+// HyperPureSiriIntents.swift
+// Siri and App Intents integration for catalog searching, cart macros, and stock audits.
 
 import Foundation
-// HyperpureSiriIntents.swift
-// Siri and App Intents integration for catalog searching and cart management.
-
 import AppIntents
 import SwiftUI
+import SwiftData
 
 struct ProductEntity: AppEntity, Identifiable {
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Hyperpure product"
@@ -370,11 +364,160 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
             intent: CheckHyperpureCartIntent(),
             phrases: [
                 "What's in my \(.applicationName) cart",
-                "Check my \(.applicationName) cart total"
+                "Check my \(.applicationName) cart total",
+                "Show my \(.applicationName) cart",
+                "Check cart on \(.applicationName)",
+                "Cart status on \(.applicationName)"
             ],
             shortTitle: "Check cart",
             systemImageName: "cart.fill"
         )
+
+        AppShortcut(
+            intent: ApplyMonsoonAdjustmentsIntent(),
+            phrases: [
+                "Apply monsoon adjustments on \(.applicationName)",
+                "Apply monsoon cart adjustments on \(.applicationName)",
+                "Buffer cart for monsoon on \(.applicationName)",
+                "Adjust cart for rain on \(.applicationName)",
+                "Monsoon adjustments on \(.applicationName)",
+                "Monsoon buffer on \(.applicationName)"
+            ],
+            shortTitle: "Monsoon adjustments",
+            systemImageName: "cloud.rain.fill"
+        )
+
+        AppShortcut(
+            intent: AuditLowStockPantryIntent(),
+            phrases: [
+                "Audit low stock items on \(.applicationName)",
+                "Audit low stock on \(.applicationName)",
+                "What's running low in the kitchen on \(.applicationName)",
+                "Check pantry inventory on \(.applicationName)",
+                "Pantry stock audit on \(.applicationName)",
+                "Check low stock on \(.applicationName)"
+            ],
+            shortTitle: "Audit low stock",
+            systemImageName: "exclamationmark.triangle.fill"
+        )
+    }
+}
+
+struct ApplyMonsoonAdjustmentsIntent: AppIntent {
+    static var title: LocalizedStringResource = "Apply monsoon cart adjustments"
+    static var description = IntentDescription(
+        "Increases cart quantities by 20% to safeguard against monsoon logistics delays."
+    )
+    static var openAppWhenRun: Bool = false
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        let cartItems = CartViewModel.shared.items
+        
+        if cartItems.isEmpty {
+            return .result(
+                dialog: IntentDialog("Your cart is empty. Please add items before applying monsoon adjustments."),
+                view: EmptyCartSnippetView()
+            )
+        }
+        
+        for item in cartItems {
+            let bufferQty = Int(ceil(Double(item.quantity) * 1.2))
+            CartViewModel.shared.updateQuantity(for: item.product, quantity: bufferQty)
+        }
+        
+        let dialog = IntentDialog(
+            "Applied monsoon adjustments. All cart item quantities increased by 20% to prevent transit delay issues. New cart total is ₹\(CartViewModel.shared.grandTotal)."
+        )
+        
+        return .result(
+            dialog: dialog,
+            view: CartSummarySnippetView()
+        )
+    }
+}
+
+struct AuditLowStockPantryIntent: AppIntent {
+    static var title: LocalizedStringResource = "Audit low stock items"
+    static var description = IntentDescription(
+        "Identifies and lists critical or low stock pantry items hands-free."
+    )
+    static var openAppWhenRun: Bool = false
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        let container = try ModelContainer(for: PantryItem.self)
+        let context = ModelContext(container)
+        let descriptor = FetchDescriptor<PantryItem>()
+        let allItems = try context.fetch(descriptor)
+        
+        let criticalItems = allItems.filter { $0.status == "Critical" || $0.status == "Warning" }
+        
+        let dialog: IntentDialog
+        if criticalItems.isEmpty {
+            dialog = IntentDialog("All pantry ingredients are stable. No low stock items found.")
+        } else {
+            let names = criticalItems.map { $0.name }.joined(separator: ", ")
+            dialog = IntentDialog("You have \(criticalItems.count) critical items: \(names). Consider restocking them.")
+        }
+        
+        return .result(
+            dialog: dialog,
+            view: PantryAuditSnippetView(criticalItems: criticalItems)
+        )
+    }
+}
+
+struct PantryAuditSnippetView: View {
+    let criticalItems: [PantryItem]
+    
+    private let layoutPadding: CGFloat = 20
+    private let strokeOpacity: Double = 0.25
+    private let strokeWidth: CGFloat = 1
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Pantry Stock Audit", systemImage: "exclamationmark.triangle.fill")
+                .font(.headline)
+                .foregroundStyle(Theme.primary)
+
+            if criticalItems.isEmpty {
+                Text("All tracked ingredients are at healthy levels.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+            } else {
+                ForEach(criticalItems, id: \.id) { item in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.name)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.textPrimary)
+                            Text("Only \(String(format: "%.1f", item.calculatedQuantity)) \(item.unit) remaining")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textMuted)
+                        }
+
+                        Spacer()
+
+                        Text(item.status)
+                            .font(.caption.weight(.bold))
+                            .foregroundColor(Theme.primary)
+                    }
+                    .padding(.vertical, 4)
+
+                    if item.id != criticalItems.last?.id {
+                        Divider()
+                    }
+                }
+            }
+        }
+        .padding(layoutPadding)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radiusLg, style: .continuous)
+                .strokeBorder(Color.white.opacity(strokeOpacity), lineWidth: strokeWidth)
+        )
+        .padding(.horizontal, 4)
     }
 }
 
@@ -397,4 +540,9 @@ struct HyperpureAppShortcuts: AppShortcutsProvider {
 
 #Preview("Empty Cart Snippet") {
     EmptyCartSnippetView()
+}
+
+#Preview("Pantry Audit Snippet") {
+    let item = PantryItem(name: "Fresh Chicken Breast", category: "chicken-eggs", currentQuantity: 15.0, unit: "kg", purchasedDate: Date(), dailyDepletionRate: 3.5, shelfLifeDays: 5)
+    PantryAuditSnippetView(criticalItems: [item])
 }

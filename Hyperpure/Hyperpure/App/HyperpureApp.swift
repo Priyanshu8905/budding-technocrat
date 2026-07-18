@@ -2,6 +2,7 @@
 // Main entry point of the Hyperpure application.
 
 import SwiftUI
+import SwiftData
 
 @main
 struct HyperpureApp: App {
@@ -11,6 +12,7 @@ struct HyperpureApp: App {
         WindowGroup {
             MainTabView()
                 .environment(cartViewModel)
+                .modelContainer(for: PantryItem.self)
         }
     }
 }
