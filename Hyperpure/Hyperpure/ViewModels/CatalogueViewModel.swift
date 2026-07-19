@@ -1,47 +1,52 @@
+// CatalogueViewModel.swift
+// ViewModel managing the product catalog and categories using SwiftData.
+
 import SwiftUI
 import Observation
+import SwiftData
 
-enum SortOption: String, CaseIterable, Identifiable {
+public enum SortOption: String, CaseIterable, Identifiable {
     case popular = "Popularity"
     case priceLowToHigh = "Price: Low to High"
     case priceHighToLow = "Price: High to Low"
     case rating = "Customer Rating"
     
-    var id: String { rawValue }
+    public var id: String { rawValue }
 }
 
+@MainActor
 @Observable
-final class CatalogueViewModel {
-    var categories: [Category] = MockCategories.categories
-    var products: [Product] = MockProducts.products
-    var selectedCategoryId: String? = nil
-    var searchQuery: String = ""
-    var selectedSort: SortOption = .popular
-    var isLoading: Bool = false
+public final class CatalogueViewModel {
+    public static let shared = CatalogueViewModel()
     
-    var allCategories: [Category] { categories }
+    public var selectedCategoryId: String? = nil
+    public var searchQuery: String = ""
+    public var selectedSort: SortOption = .popular
+    public var isLoading: Bool = false
     
-    init(initialCategoryId: String? = nil) {
+    public init(initialCategoryId: String? = nil) {
         self.selectedCategoryId = initialCategoryId
-        loadInitialData()
     }
     
-    func loadInitialData() {
-        self.categories = MockCategories.categories
-        self.products = MockProducts.products
+    public var allCategories: [Category] {
+        let descriptor = FetchDescriptor<Category>(sortBy: [SortDescriptor(\.name)])
+        return (try? Database.shared.context.fetch(descriptor)) ?? []
     }
     
-    func selectCategory(_ categoryId: String?) {
+    public func selectCategory(_ categoryId: String?) {
         selectedCategoryId = categoryId
     }
     
-    func productCount(for categoryId: String?) -> Int {
-        guard let categoryId = categoryId else { return products.count }
-        return products.filter { $0.category == categoryId }.count
+    public func productCount(for categoryId: String?) -> Int {
+        let descriptor = FetchDescriptor<Product>()
+        guard let allProds = try? Database.shared.context.fetch(descriptor) else { return 0 }
+        guard let categoryId = categoryId else { return allProds.count }
+        return allProds.filter { $0.category == categoryId }.count
     }
     
-    var filteredProducts: [Product] {
-        var result = products
+    public var filteredProducts: [Product] {
+        let descriptor = FetchDescriptor<Product>()
+        guard var result = try? Database.shared.context.fetch(descriptor) else { return [] }
         
         if let catId = selectedCategoryId {
             result = result.filter { $0.category == catId }
@@ -52,7 +57,7 @@ final class CatalogueViewModel {
             result = result.filter {
                 $0.name.lowercased().contains(lower) ||
                 $0.category.lowercased().contains(lower) ||
-                $0.description.lowercased().contains(lower)
+                $0.productDescription.lowercased().contains(lower)
             }
         }
         

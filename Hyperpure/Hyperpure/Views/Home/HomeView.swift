@@ -4,7 +4,7 @@ import MapKit
 import ActivityKit
 
 struct HomeView: View {
-    @State private var viewModel = HomeViewModel()
+    @State private var viewModel = HomeViewModel.shared
     @State private var searchText: String = ""
     @State private var weatherViewModel = WeatherIntelligenceViewModel.shared
     @State private var isCategoriesSheetPresented = false
@@ -48,7 +48,7 @@ struct HomeView: View {
                             ProductRailView(
                                 categoryName: "Chicken & Eggs",
                                 categorySubtitle: "sourced locally",
-                                products: MockProducts.products.filter { $0.category == "chicken-eggs" },
+                                products: viewModel.featuredProducts.filter { $0.category == "chicken-eggs" },
                                 onSeeAll: { onNavigateToCategory?("chicken-eggs") }
                             )
                             
@@ -56,7 +56,7 @@ struct HomeView: View {
                             ProductRailView(
                                 categoryName: "Frozen & Instant Food",
                                 categorySubtitle: "ready to cook & eat",
-                                products: MockProducts.products.filter { $0.category == "frozen" },
+                                products: viewModel.featuredProducts.filter { $0.category == "frozen" },
                                 onSeeAll: { onNavigateToCategory?("frozen") }
                             )
                             
@@ -64,7 +64,7 @@ struct HomeView: View {
                             ProductRailView(
                                 categoryName: "Sauces & Seasoning",
                                 categorySubtitle: "flavour enhancers",
-                                products: MockProducts.products.filter { $0.category == "sauces-seasoning" },
+                                products: viewModel.featuredProducts.filter { $0.category == "sauces-seasoning" },
                                 onSeeAll: { onNavigateToCategory?("sauces-seasoning") }
                             )
                             
@@ -72,7 +72,7 @@ struct HomeView: View {
                             ProductRailView(
                                 categoryName: "Canned & Imported Items",
                                 categorySubtitle: "for your gourmet needs",
-                                products: MockProducts.products.filter { $0.category == "canned-imported" },
+                                products: viewModel.featuredProducts.filter { $0.category == "canned-imported" },
                                 onSeeAll: { onNavigateToCategory?("canned-imported") }
                             )
                             
@@ -80,7 +80,7 @@ struct HomeView: View {
                             ProductRailView(
                                 categoryName: "Packaging Material",
                                 categorySubtitle: "all packaging essentials",
-                                products: MockProducts.products.filter { $0.category == "packaging" },
+                                products: viewModel.featuredProducts.filter { $0.category == "packaging" },
                                 onSeeAll: { onNavigateToCategory?("packaging") }
                             )
                             
@@ -88,7 +88,7 @@ struct HomeView: View {
                             ProductRailView(
                                 categoryName: "Bakery & Chocolates",
                                 categorySubtitle: "bakery & chocolates",
-                                products: MockProducts.products.filter { $0.category == "bakery" },
+                                products: viewModel.featuredProducts.filter { $0.category == "bakery" },
                                 onSeeAll: { onNavigateToCategory?("bakery") }
                             )
                         }
@@ -167,6 +167,7 @@ struct HomeView: View {
                 DeliveryTrackingDetailSheet()
             }
             .onAppear {
+                viewModel.loadData()
                 checkoutManager.restoreActiveActivityIfAny()
             }
         }
@@ -256,13 +257,13 @@ struct HomeView: View {
         let weatherSuggestedProducts: [Product]
         switch weatherState {
         case .normal:
-            weatherSuggestedProducts = MockProducts.products.filter { [1, 301, 402].contains($0.id) }
+            weatherSuggestedProducts = viewModel.featuredProducts.filter { [1, 301, 402].contains($0.id) }
         case .monsoon:
-            weatherSuggestedProducts = MockProducts.products.filter { [11, 12, 13].contains($0.id) }
+            weatherSuggestedProducts = viewModel.featuredProducts.filter { [11, 12, 13].contains($0.id) }
         case .heatwave:
-            weatherSuggestedProducts = MockProducts.products.filter { [102, 402, 203].contains($0.id) }
+            weatherSuggestedProducts = viewModel.featuredProducts.filter { [102, 402, 203].contains($0.id) }
         case .winterCold:
-            weatherSuggestedProducts = MockProducts.products.filter { [801, 401, 11].contains($0.id) }
+            weatherSuggestedProducts = viewModel.featuredProducts.filter { [801, 401, 11].contains($0.id) }
         }
         
         return weatherSuggestedProducts.filter { !isProductInStockInPantry($0) }
@@ -481,18 +482,20 @@ struct DeliveryTrackingDetailSheet: View {
                         } else {
                             ForEach(checkoutManager.purchasedItems) { item in
                                 HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(item.product.name)
+                                    if let product = item.product {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(product.name)
+                                                .font(.subheadline.bold())
+                                                .foregroundColor(Theme.textPrimary)
+                                            Text("Qty: \(item.quantity) units x ₹\(Int(round(product.price)))")
+                                                .font(.caption)
+                                                .foregroundColor(Theme.textSecondary)
+                                        }
+                                        Spacer()
+                                        Text("₹\(item.subtotal)")
                                             .font(.subheadline.bold())
                                             .foregroundColor(Theme.textPrimary)
-                                        Text("Qty: \(item.quantity) units x ₹\(Int(round(item.product.price)))")
-                                            .font(.caption)
-                                            .foregroundColor(Theme.textSecondary)
                                     }
-                                    Spacer()
-                                    Text("₹\(item.subtotal)")
-                                        .font(.subheadline.bold())
-                                        .foregroundColor(Theme.textPrimary)
                                 }
                                 .padding(.vertical, 2)
                             }

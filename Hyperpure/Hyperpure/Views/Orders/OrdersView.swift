@@ -1,8 +1,9 @@
 import SwiftUI
+import SwiftData
 
 struct OrdersView: View {
     @State private var selectedFilter = 0
-    @Bindable private var orderManager = OrderManager.shared
+    @State private var orderManager = OrderManager.shared
     var onStartShopping: (() -> Void)?
     
     private var activeOrders: [Order] {
@@ -94,6 +95,7 @@ struct OrderCardView: View {
         case .pendingConfirmation: return Theme.offer
         case .confirmed: return Theme.success
         case .cancelled: return Theme.primary
+        default: return Theme.success
         }
     }
     
@@ -102,6 +104,7 @@ struct OrderCardView: View {
         case .pendingConfirmation: return "clock.fill"
         case .confirmed: return "checkmark.circle.fill"
         case .cancelled: return "xmark.circle.fill"
+        default: return "checkmark.circle.fill"
         }
     }
     
@@ -143,23 +146,30 @@ struct OrderCardView: View {
             VStack(spacing: 6) {
                 ForEach(order.items.prefix(3)) { item in
                     HStack {
-                        Text(categoryEmoji(for: item.product.category))
-                            .font(.system(size: 16))
-                        
-                        Text(item.product.name)
-                            .font(.caption)
-                            .foregroundColor(Theme.textPrimary)
-                            .lineLimit(1)
-                        
-                        Spacer()
-                        
-                        Text("×\(item.quantity)")
-                            .font(.caption.weight(.bold))
-                            .foregroundColor(Theme.textSecondary)
-                        
-                        Text(item.product.formattedPrice)
-                            .font(.caption.weight(.bold))
-                            .foregroundColor(Theme.textPrimary)
+                        if let product = item.product {
+                            Text(categoryEmoji(for: product.category))
+                                .font(.system(size: 16))
+                            
+                            Text(product.name)
+                                .font(.caption)
+                                .foregroundColor(Theme.textPrimary)
+                                .lineLimit(1)
+                            
+                            Spacer()
+                            
+                            Text("×\(item.quantity)")
+                                .font(.caption.weight(.bold))
+                                .foregroundColor(Theme.textSecondary)
+                            
+                            Text(product.formattedPrice)
+                                .font(.caption.weight(.bold))
+                                .foregroundColor(Theme.textPrimary)
+                        } else {
+                            Text("Unknown Product")
+                                .font(.caption)
+                                .foregroundColor(Theme.textSecondary)
+                            Spacer()
+                        }
                     }
                 }
                 

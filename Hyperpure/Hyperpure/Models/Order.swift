@@ -1,41 +1,54 @@
-import Foundation
+// Order.swift
+// SwiftData model representing a finalized procurement order.
 
-enum OrderStatus: String, Codable {
+import Foundation
+import SwiftData
+
+public enum OrderStatus: String, Codable, CaseIterable {
+    case placed = "Placed"
+    case dispatched = "Dispatched"
+    case nearStore = "Near Store"
+    case delivered = "Delivered"
     case pendingConfirmation = "Pending Confirmation"
     case confirmed = "Confirmed"
     case cancelled = "Cancelled"
 }
 
-struct Order: Identifiable, Codable {
-    let id: String
-    var items: [CartItem]
-    let subtotal: Int
-    let deliveryFee: Int
-    let tax: Int
-    let grandTotal: Int
-    let deliverySlot: String
-    let placedAt: Date
-    var status: OrderStatus
+@Model
+public final class Order: Identifiable {
+    @Attribute(.unique) public var id: String
+    @Relationship(deleteRule: .cascade) public var lineItems: [CartLineItem]
+    public var subtotal: Int
+    public var deliveryFee: Int
+    public var tax: Int
+    public var grandTotal: Int
+    public var deliverySlot: String
+    public var placedAt: Date
+    public var statusRaw: String
     
-    /// Whether the order is still within the 1-minute modification window
-    var isModifiable: Bool {
+    public var status: OrderStatus {
+        get { OrderStatus(rawValue: statusRaw) ?? .pendingConfirmation }
+        set { statusRaw = newValue.rawValue }
+    }
+    
+    public var items: [CartLineItem] { lineItems }
+    
+    public var isModifiable: Bool {
         status == .pendingConfirmation && remainingSeconds > 0
     }
     
-    /// Seconds remaining in the modification window (60s from placement)
-    var remainingSeconds: Int {
+    public var remainingSeconds: Int {
         let elapsed = Date().timeIntervalSince(placedAt)
         return max(0, 60 - Int(elapsed))
     }
     
-    /// Total item count across all cart items
-    var totalItemCount: Int {
-        items.reduce(0) { $0 + $1.quantity }
+    public var totalItemCount: Int {
+        lineItems.reduce(0) { $0 + $1.quantity }
     }
     
-    init(
+    public init(
         id: String = UUID().uuidString,
-        items: [CartItem],
+        items: [CartLineItem],
         subtotal: Int,
         deliveryFee: Int,
         tax: Int,
@@ -45,13 +58,13 @@ struct Order: Identifiable, Codable {
         status: OrderStatus = .pendingConfirmation
     ) {
         self.id = id
-        self.items = items
+        self.lineItems = items
         self.subtotal = subtotal
         self.deliveryFee = deliveryFee
         self.tax = tax
         self.grandTotal = grandTotal
         self.deliverySlot = deliverySlot
         self.placedAt = placedAt
-        self.status = status
+        self.statusRaw = status.rawValue
     }
 }

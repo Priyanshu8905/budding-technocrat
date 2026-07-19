@@ -12,7 +12,7 @@ struct HyperpureApp: App {
         WindowGroup {
             MainTabView()
                 .environment(cartViewModel)
-                .modelContainer(for: PantryItem.self)
+                .modelContainer(Database.shared.container)
         }
     }
 }

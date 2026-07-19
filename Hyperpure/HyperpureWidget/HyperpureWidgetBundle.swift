@@ -6,5 +6,6 @@ import SwiftUI
 struct HyperpureWidgetBundle: WidgetBundle {
     var body: some Widget {
         KitchenStatusWidget()
+        DeliveryTrackingLiveActivity()
     }
 }

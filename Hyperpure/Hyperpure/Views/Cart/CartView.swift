@@ -67,8 +67,10 @@ struct CartView: View {
                                     Spacer()
                                     Button {
                                         for item in cartViewModel.items {
-                                            let bufferQty = Int(ceil(Double(item.quantity) * 1.2))
-                                            cartViewModel.updateQuantity(for: item.product, quantity: bufferQty)
+                                            if let product = item.product {
+                                                let bufferQty = Int(ceil(Double(item.quantity) * 1.2))
+                                                cartViewModel.updateQuantity(for: product, quantity: bufferQty)
+                                            }
                                         }
                                     } label: {
                                         Text("Apply Buffer")
@@ -91,58 +93,60 @@ struct CartView: View {
                             
                             VStack(spacing: 12) {
                                 ForEach(cartViewModel.items) { item in
-                                    HStack(spacing: 12) {
-                                        Text(categoryEmoji(for: item.product.category))
-                                            .font(.system(size: 32))
-                                            .frame(width: 50, height: 50)
-                                            .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                        
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(item.product.name)
-                                                .font(.subheadline.weight(.semibold))
-                                                .foregroundColor(Theme.textPrimary)
-                                            Text(item.product.weight)
-                                                .font(.caption)
-                                                .foregroundColor(Theme.textMuted)
-                                            Text("\(item.product.formattedPrice) × \(item.quantity) = ₹\(item.subtotal)")
-                                                .font(.caption.weight(.bold))
-                                                .foregroundColor(Theme.primary)
-                                        }
-                                        
-                                        Spacer()
-                                        
-                                        HStack(spacing: 8) {
-                                            Button {
-                                                cartViewModel.updateQuantity(for: item.product, quantity: item.quantity - 1)
-                                            } label: {
-                                                Image(systemName: "minus")
-                                                    .font(.caption2.weight(.bold))
+                                    if let product = item.product {
+                                        HStack(spacing: 12) {
+                                            Text(categoryEmoji(for: product.category))
+                                                .font(.system(size: 32))
+                                                .frame(width: 50, height: 50)
+                                                .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                            
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(product.name)
+                                                    .font(.subheadline.weight(.semibold))
+                                                    .foregroundColor(Theme.textPrimary)
+                                                Text(product.weight)
+                                                    .font(.caption)
+                                                    .foregroundColor(Theme.textMuted)
+                                                Text("\(product.formattedPrice) × \(item.quantity) = ₹\(item.subtotal)")
+                                                    .font(.caption.weight(.bold))
                                                     .foregroundColor(Theme.primary)
-                                                    .frame(width: 26, height: 26)
-                                                    .background(Theme.primaryBg)
-                                                    .clipShape(Circle())
                                             }
                                             
-                                            Text("\(item.quantity)")
-                                                .font(.caption.weight(.bold))
+                                            Spacer()
                                             
-                                            Button {
-                                                cartViewModel.updateQuantity(for: item.product, quantity: item.quantity + 1)
-                                            } label: {
-                                                Image(systemName: "plus")
-                                                    .font(.caption2.weight(.bold))
-                                                    .foregroundColor(.white)
-                                                    .frame(width: 26, height: 26)
-                                                    .background(Theme.primary)
-                                                    .clipShape(Circle())
+                                            HStack(spacing: 8) {
+                                                Button {
+                                                    cartViewModel.updateQuantity(for: product, quantity: item.quantity - 1)
+                                                } label: {
+                                                    Image(systemName: "minus")
+                                                        .font(.caption2.weight(.bold))
+                                                        .foregroundColor(Theme.primary)
+                                                        .frame(width: 26, height: 26)
+                                                        .background(Theme.primaryBg)
+                                                        .clipShape(Circle())
+                                                }
+                                                
+                                                Text("\(item.quantity)")
+                                                    .font(.caption.weight(.bold))
+                                                
+                                                Button {
+                                                    cartViewModel.updateQuantity(for: product, quantity: item.quantity + 1)
+                                                } label: {
+                                                    Image(systemName: "plus")
+                                                        .font(.caption2.weight(.bold))
+                                                        .foregroundColor(.white)
+                                                        .frame(width: 26, height: 26)
+                                                        .background(Theme.primary)
+                                                        .clipShape(Circle())
+                                                }
                                             }
+                                            .sensoryFeedback(.selection, trigger: item.quantity)
                                         }
-                                        .sensoryFeedback(.selection, trigger: item.quantity)
+                                        .padding(12)
+                                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                                     }
-                                    .padding(12)
-                                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                                 }
                             }
                             

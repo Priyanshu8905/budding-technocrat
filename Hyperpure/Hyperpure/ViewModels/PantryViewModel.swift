@@ -79,8 +79,15 @@ final class PantryViewModel {
         let criticalItems = pantryItems.filter { $0.status == "Critical" || $0.status == "Warning" }
         var drafts: [Product] = []
         
+        guard let context = modelContext else {
+            isGeneratingReplenishment = false
+            return
+        }
+        
+        let allProducts = (try? context.fetch(FetchDescriptor<Product>())) ?? []
+        
         for item in criticalItems {
-            if let matchedProduct = MockProducts.products.first(where: { $0.name.lowercased().contains(item.name.lowercased()) || item.name.lowercased().contains($0.name.lowercased()) }) {
+            if let matchedProduct = allProducts.first(where: { $0.name.localizedCaseInsensitiveContains(item.name) || item.name.localizedCaseInsensitiveContains($0.name) }) {
                 drafts.append(matchedProduct)
             }
         }

@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4FBCA53E28944444890D15C7 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09FB82CDD4C4663BDE3CF82 /* Database.swift */; };
+		7A1B8118A92542C097941E3A /* SavedListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26827BC8E954F6482FEFBE5 /* SavedListItem.swift */; };
+		86E61244A64F4E918C6C8E02 /* AccountProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B1A4C3ED4047D2933093B2 /* AccountProfile.swift */; };
+		CC8CAC24AC714BAB8A6CF782 /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A634006BD0A463CB2E7712C /* AccountViewModel.swift */; };
+		8D41D0AFD3F349AF8D5F5D82 /* HyperpureAppEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476FFC2EE654987A7390D3C /* HyperpureAppEntities.swift */; };
+		14D1A374B42D40BCAC8E904A /* HyperpureAppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC31783319E4E678F0FE2EB /* HyperpureAppIntents.swift */; };
+		7BCCCA0D414440F4ABB2456A /* HyperpureAppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953488F37B374198939CC088 /* HyperpureAppShortcuts.swift */; };
 		F94A2C1AD14643ECBCFC5297 /* MyListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21484BCCE04F4E4A86E2DA0E /* MyListViewModel.swift */; };
 		0381C5676EFC480585F3F5DF /* OrdersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E76823D6073645718E38CBCB /* OrdersView.swift */; };
 		039095BF2ED54AB9A0FD3DFC /* CheckoutWorkflowIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D25EBFE6CDFC47E79DA5AB0B /* CheckoutWorkflowIntents.swift */; };
@@ -44,6 +51,9 @@
 		F2E1D0C9B8A7F6E5D4C3B2A1 /* WidgetDataBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* WidgetDataBridge.swift */; };
 		BF1D7A177A634AB6ACA50BFE /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFA050FB0F934D41B3C41502 /* AppState.swift */; };
 		C0723937300BBBC4006722AC /* HyperPureSiriIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0723936300BBBC4006722AC /* HyperPureSiriIntents.swift */; };
+		AA1B2C3D4E5F6A7B8C9D2010 /* HyperpureWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F6A7B8C9D2020 /* HyperpureWidgetBundle.swift */; };
+		AA1B2C3D4E5F6A7B8C9D2011 /* KitchenStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F6A7B8C9D2021 /* KitchenStatusWidget.swift */; };
+		AA1B2C3D4E5F6A7B8C9D2012 /* DeliveryTrackingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F6A7B8C9D2024 /* DeliveryTrackingLiveActivity.swift */; };
 		C5D5A383FEBB4C2DA7ED1281 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7900CF5E7622499080CC4659 /* SearchBarView.swift */; };
 		CC333DFCB84C41A49F741FEC /* CategoriesSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2A125D9EC347E0A4802511 /* CategoriesSheetView.swift */; };
 		CE81D7C00FAC448894AAA246 /* HeroBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08EF78AA484041CDB11F16C3 /* HeroBannerView.swift */; };
@@ -69,6 +79,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A09FB82CDD4C4663BDE3CF82 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Database.swift; path = Hyperpure/Models/Database.swift; sourceTree = "<group>"; };
+		C26827BC8E954F6482FEFBE5 /* SavedListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SavedListItem.swift; path = Hyperpure/Models/SavedListItem.swift; sourceTree = "<group>"; };
+		C5B1A4C3ED4047D2933093B2 /* AccountProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AccountProfile.swift; path = Hyperpure/Models/AccountProfile.swift; sourceTree = "<group>"; };
+		7A634006BD0A463CB2E7712C /* AccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AccountViewModel.swift; path = Hyperpure/ViewModels/AccountViewModel.swift; sourceTree = "<group>"; };
+		0476FFC2EE654987A7390D3C /* HyperpureAppEntities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HyperpureAppEntities.swift; path = Hyperpure/AppIntents/HyperpureAppEntities.swift; sourceTree = "<group>"; };
+		BBC31783319E4E678F0FE2EB /* HyperpureAppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HyperpureAppIntents.swift; path = Hyperpure/AppIntents/HyperpureAppIntents.swift; sourceTree = "<group>"; };
+		953488F37B374198939CC088 /* HyperpureAppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HyperpureAppShortcuts.swift; path = Hyperpure/AppIntents/HyperpureAppShortcuts.swift; sourceTree = "<group>"; };
 		008E8E3ECCA642DEB165A544 /* CheckoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckoutView.swift; path = Hyperpure/Views/Cart/CheckoutView.swift; sourceTree = "<group>"; };
 		21484BCCE04F4E4A86E2DA0E /* MyListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MyListViewModel.swift; path = Hyperpure/ViewModels/MyListViewModel.swift; sourceTree = "<group>"; };
 		02ACD95B52AC401DB81D0338 /* ContentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentModels.swift; path = Hyperpure/Models/ContentModels.swift; sourceTree = "<group>"; };
@@ -139,6 +156,11 @@
 		AA1B2C3D4E5F6A7B8C9D2002 /* OrderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrderManager.swift; path = Hyperpure/ViewModels/OrderManager.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F6A7B8C9D2003 /* OrderModificationBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrderModificationBanner.swift; path = Hyperpure/Views/Components/OrderModificationBanner.swift; sourceTree = "<group>"; };
 		FF93F30A840042D0A22FB9EC /* WeatherIntelligenceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WeatherIntelligenceWidget.swift; path = Hyperpure/AppIntents/WeatherIntelligenceWidget.swift; sourceTree = "<group>"; };
+		AA1B2C3D4E5F6A7B8C9D2020 /* HyperpureWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HyperpureWidgetBundle.swift; path = HyperpureWidget/HyperpureWidgetBundle.swift; sourceTree = "<group>"; };
+		AA1B2C3D4E5F6A7B8C9D2021 /* KitchenStatusWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KitchenStatusWidget.swift; path = HyperpureWidget/KitchenStatusWidget.swift; sourceTree = "<group>"; };
+		AA1B2C3D4E5F6A7B8C9D2022 /* HyperpureWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = HyperpureWidget.entitlements; path = HyperpureWidget/HyperpureWidget.entitlements; sourceTree = "<group>"; };
+		AA1B2C3D4E5F6A7B8C9D2023 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = HyperpureWidget/Info.plist; sourceTree = "<group>"; };
+		AA1B2C3D4E5F6A7B8C9D2024 /* DeliveryTrackingLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DeliveryTrackingLiveActivity.swift; path = HyperpureWidget/DeliveryTrackingLiveActivity.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -147,6 +169,18 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
+		AA1B2C3D4E5F6A7B8C9D2030 /* HyperpureWidget */ = {
+			isa = PBXGroup;
+			children = (
+				AA1B2C3D4E5F6A7B8C9D2020 /* HyperpureWidgetBundle.swift */,
+				AA1B2C3D4E5F6A7B8C9D2021 /* KitchenStatusWidget.swift */,
+				AA1B2C3D4E5F6A7B8C9D2024 /* DeliveryTrackingLiveActivity.swift */,
+				AA1B2C3D4E5F6A7B8C9D2022 /* HyperpureWidget.entitlements */,
+				AA1B2C3D4E5F6A7B8C9D2023 /* Info.plist */,
+			);
+			name = HyperpureWidget;
+			sourceTree = "<group>";
+		};
 		02D5C9BD78304054BC6EB439 /* Sustainability */ = {
 			isa = PBXGroup;
 			children = (
@@ -221,6 +255,9 @@
 		747718436FED4CA4B932A79B /* App */ = {
 			isa = PBXGroup;
 			children = (
+				953488F37B374198939CC088 /* HyperpureAppShortcuts.swift */,
+				BBC31783319E4E678F0FE2EB /* HyperpureAppIntents.swift */,
+				0476FFC2EE654987A7390D3C /* HyperpureAppEntities.swift */,
 				09527ABB635D42CBAFF8BCCD /* OrderConfirmationView.swift */,
 				008E8E3ECCA642DEB165A544 /* CheckoutView.swift */,
 				D25EBFE6CDFC47E79DA5AB0B /* CheckoutWorkflowIntents.swift */,
@@ -253,6 +290,7 @@
 				3BBA2110114D42A48F11174C /* Services */,
 				A9F17AB119D940678E6ABED2 /* ViewModels */,
 				140FD2E4688B4BDD8B893941 /* Views */,
+				AA1B2C3D4E5F6A7B8C9D2030 /* HyperpureWidget */,
 				C0723941300BE52E006722AC /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -260,6 +298,7 @@
 		A9F17AB119D940678E6ABED2 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				7A634006BD0A463CB2E7712C /* AccountViewModel.swift */,
 				21484BCCE04F4E4A86E2DA0E /* MyListViewModel.swift */,
 				93C5385BCC874DDE9955D132 /* PantryViewModel.swift */,
 				D8171C5B05A14D13A625D702 /* WeatherIntelligenceViewModel.swift */,
@@ -334,6 +373,9 @@
 		D8171C5B05A14D13A625D7C3 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C5B1A4C3ED4047D2933093B2 /* AccountProfile.swift */,
+				C26827BC8E954F6482FEFBE5 /* SavedListItem.swift */,
+				A09FB82CDD4C4663BDE3CF82 /* Database.swift */,
 				CFA050FB0F934D41B3C41502 /* AppState.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* WidgetDataBridge.swift */,
 				B2E94EC54DE745D4A4A0E1E5 /* PantryAIProcessor.swift */,
@@ -381,6 +423,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				AA1B2C3D4E5F6A7B8C9D2041 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C0723938300BDF4E006722AC /* Main Tab */,
@@ -390,7 +433,39 @@
 			productName = Hyperpure;
 			productType = "com.apple.product-type.application";
 		};
+		AA1B2C3D4E5F6A7B8C9D2050 /* HyperpureWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA1B2C3D4E5F6A7B8C9D2070 /* Build configuration list for PBXNativeTarget "HyperpureWidget" */;
+			buildPhases = (
+				AA1B2C3D4E5F6A7B8C9D2060 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HyperpureWidget;
+			productName = HyperpureWidget;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		AA1B2C3D4E5F6A7B8C9D2040 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C5A4AE8E2FA34FCAB8947B24 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA1B2C3D4E5F6A7B8C9D2050;
+			remoteInfo = HyperpureWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		AA1B2C3D4E5F6A7B8C9D2041 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA1B2C3D4E5F6A7B8C9D2050 /* HyperpureWidget */;
+			targetProxy = AA1B2C3D4E5F6A7B8C9D2040 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		C5A4AE8E2FA34FCAB8947B24 /* Project object */ = {
@@ -400,6 +475,9 @@
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					0A1C9212329140C584E6F960 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					AA1B2C3D4E5F6A7B8C9D2050 = {
 						CreatedOnToolsVersion = 15.4;
 					};
 				};
@@ -418,6 +496,7 @@
 			projectRoot = "";
 			targets = (
 				0A1C9212329140C584E6F960 /* Hyperpure */,
+				AA1B2C3D4E5F6A7B8C9D2050 /* HyperpureWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -427,6 +506,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4FBCA53E28944444890D15C7 /* Database.swift in Sources */,
+				7A1B8118A92542C097941E3A /* SavedListItem.swift in Sources */,
+				86E61244A64F4E918C6C8E02 /* AccountProfile.swift in Sources */,
+				CC8CAC24AC714BAB8A6CF782 /* AccountViewModel.swift in Sources */,
+				8D41D0AFD3F349AF8D5F5D82 /* HyperpureAppEntities.swift in Sources */,
+				14D1A374B42D40BCAC8E904A /* HyperpureAppIntents.swift in Sources */,
+				7BCCCA0D414440F4ABB2456A /* HyperpureAppShortcuts.swift in Sources */,
 				F94A2C1AD14643ECBCFC5297 /* MyListViewModel.swift in Sources */,
 				45298779A85A4723BE49A73F /* OrderConfirmationView.swift in Sources */,
 				55D16873D64749EE87AD14CA /* CheckoutView.swift in Sources */,
@@ -490,6 +576,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA1B2C3D4E5F6A7B8C9D2060 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA1B2C3D4E5F6A7B8C9D2010 /* HyperpureWidgetBundle.swift in Sources */,
+				AA1B2C3D4E5F6A7B8C9D2011 /* KitchenStatusWidget.swift in Sources */,
+				AA1B2C3D4E5F6A7B8C9D2012 /* DeliveryTrackingLiveActivity.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		182822F2F3C5409E812FAE22 /* Debug */ = {
@@ -585,6 +684,58 @@
 			};
 			name = Release;
 		};
+		AA1B2C3D4E5F6A7B8C9D2080 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = HyperpureWidget/HyperpureWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 73B8W4ZN6V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HyperpureWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HyperpureWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = hyperpure.com;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hyperpure.com.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA1B2C3D4E5F6A7B8C9D2081 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = HyperpureWidget/HyperpureWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 73B8W4ZN6V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HyperpureWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HyperpureWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = hyperpure.com;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hyperpure.com.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -602,6 +753,15 @@
 			buildConfigurations = (
 				2BB3532C4BB648868D06C58B /* Debug */,
 				89B6CCB46F7C4B079E81F832 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA1B2C3D4E5F6A7B8C9D2070 /* Build configuration list for PBXNativeTarget "HyperpureWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA1B2C3D4E5F6A7B8C9D2080 /* Debug */,
+				AA1B2C3D4E5F6A7B8C9D2081 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

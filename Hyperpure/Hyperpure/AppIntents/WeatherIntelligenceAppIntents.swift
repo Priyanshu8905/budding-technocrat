@@ -93,25 +93,22 @@ struct ApplyWeatherOptimizationIntent: AppIntent {
         let cartItems = CartViewModel.shared.items
         
         for item in cartItems {
+            guard let product = item.product else { continue }
             let originalQty = item.quantity
             let optimizedQty: Int
             
             if targetState == .monsoon {
-                if item.product.category == "fruits-vegetables" || item.product.category == "chicken-eggs" {
-                    // Reduce perishable by 20%
+                if product.category == "fruits-vegetables" || product.category == "chicken-eggs" {
                     optimizedQty = max(1, Int(round(Double(originalQty) * 0.80)))
-                } else if item.product.category == "frozen" || item.product.category == "packaging" {
-                    // Upscale comfort / raw stock by 15%
+                } else if product.category == "frozen" || product.category == "packaging" {
                     optimizedQty = Int(ceil(Double(originalQty) * 1.15))
                 } else {
                     optimizedQty = originalQty
                 }
             } else if targetState == .heatwave {
-                if item.product.category == "dairy" || item.product.category == "chicken-eggs" {
-                    // Reduce spoilage items by 15%
+                if product.category == "dairy" || product.category == "chicken-eggs" {
                     optimizedQty = max(1, Int(round(Double(originalQty) * 0.85)))
-                } else if item.product.category == "beverages" {
-                    // Upscale cooling drinks by 30%
+                } else if product.category == "beverages" {
                     optimizedQty = Int(ceil(Double(originalQty) * 1.30))
                 } else {
                     optimizedQty = originalQty
@@ -121,7 +118,7 @@ struct ApplyWeatherOptimizationIntent: AppIntent {
             }
             
             if optimizedQty != originalQty {
-                CartViewModel.shared.updateQuantity(for: item.product, quantity: optimizedQty)
+                CartViewModel.shared.updateQuantity(for: product, quantity: optimizedQty)
             }
         }
         

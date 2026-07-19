@@ -2,11 +2,13 @@ import SwiftUI
 
 struct CatalogueView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel: CatalogueViewModel
+    @Bindable private var viewModel = CatalogueViewModel.shared
     @Environment(CartViewModel.self) private var cartViewModel
     
     init(initialCategoryId: String? = nil) {
-        _viewModel = State(initialValue: CatalogueViewModel(initialCategoryId: initialCategoryId))
+        if let initialCategoryId = initialCategoryId {
+            CatalogueViewModel.shared.selectedCategoryId = initialCategoryId
+        }
     }
     
     let columns = [

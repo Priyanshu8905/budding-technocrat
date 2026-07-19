@@ -5,7 +5,6 @@
 import WidgetKit
 import SwiftUI
 
-// MARK: - Shared App Group key constants (must match main app)
 enum WidgetDataKey {
     static let orderID       = "widget_orderID"
     static let statusLabel   = "widget_statusLabel"

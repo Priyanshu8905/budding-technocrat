@@ -281,11 +281,18 @@ public class CheckoutManager {
             if self.state != .completed {
                 self.state = .completed
                 postLocalNotification(title: "Order Completed! 📦", body: "Receipt saved to history.")
+                               // Save order to SwiftData database history
+                let context = Database.shared.context
+                let orderItems = self.purchasedItems.map { item in
+                    CartLineItem(product: item.product, quantity: item.quantity)
+                }
+                for item in orderItems {
+                    context.insert(item)
+                }
                 
-                // Save order to OrderManager.shared history
                 let newOrder = Order(
                     id: self.orderID,
-                    items: self.purchasedItems,
+                    items: orderItems,
                     subtotal: self.subtotal,
                     deliveryFee: self.deliveryFee,
                     tax: self.tax,
@@ -294,7 +301,9 @@ public class CheckoutManager {
                     placedAt: self.dispatchedAt,
                     status: .confirmed
                 )
-                OrderManager.shared.orders.append(newOrder)
+                context.insert(newOrder)
+                try? context.save()
+                OrderManager.shared.fetchOrders()
             }
         }
 

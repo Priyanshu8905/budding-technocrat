@@ -1,5 +1,4 @@
 import SwiftUI
-import ActivityKit
 import MapKit
 import UserNotifications
 
@@ -310,22 +309,8 @@ struct OrderConfirmationView: View {
     }
     
     private func lockAndLaunchLiveActivity() {
-        // Start ActivityKit Live Activity
-        let attributes = DeliveryTrackingAttributes(orderID: orderID, merchantName: "Hyperpure Wholesale")
-        let initialContentState = DeliveryTrackingAttributes.ContentState(
-            currentStatus: .placed,
-            estimatedArrival: Date().addingTimeInterval(1800) // 30 mins
-        )
-        
-        do {
-            let _ = try Activity<DeliveryTrackingAttributes>.request(
-                attributes: attributes,
-                content: ActivityContent(state: initialContentState, staleDate: nil),
-                pushType: nil
-            )
-        } catch {
-            print("Failed to start Live Activity: \(error.localizedDescription)")
-        }
+        // Live Activity is started by CheckoutManager.lockOrder() — do NOT start a duplicate here.
+        // This method is kept as a no-op to avoid double-starting competing activities.
     }
     
     private func requestNotificationPermission() {

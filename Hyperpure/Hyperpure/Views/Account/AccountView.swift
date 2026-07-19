@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AccountView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var isVegModeOn = false
+    @Bindable private var viewModel = AccountViewModel.shared
     
     var body: some View {
         NavigationStack {
@@ -78,7 +78,7 @@ struct AccountView: View {
                             
                             Spacer()
                             
-                            Text("₹0")
+                            Text("₹\(Int(viewModel.walletBalance))")
                                 .font(.caption.weight(.bold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 12)
@@ -125,7 +125,10 @@ struct AccountView: View {
                                 
                                 Spacer()
                                 
-                                Toggle("", isOn: $isVegModeOn)
+                                Toggle("", isOn: Binding(
+                                    get: { viewModel.isVegModeOn },
+                                    set: { viewModel.updateVegMode($0) }
+                                ))
                                     .labelsHidden()
                                     .tint(Color.green)
                             }

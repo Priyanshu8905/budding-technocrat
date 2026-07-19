@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct MyListView: View {
     var onStartShopping: (() -> Void)?
@@ -30,9 +31,11 @@ struct MyListView: View {
         if searchText.isEmpty {
             return []
         }
-        return MockProducts.products.filter {
+        let descriptor = FetchDescriptor<Product>()
+        let products = (try? Database.shared.context.fetch(descriptor)) ?? []
+        return products.filter {
             $0.name.localizedCaseInsensitiveContains(searchText) ||
-            $0.description.localizedCaseInsensitiveContains(searchText) ||
+            $0.productDescription.localizedCaseInsensitiveContains(searchText) ||
             $0.subcategory.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -180,7 +183,9 @@ struct MyListView: View {
                                         .foregroundColor(Theme.textPrimary)
                                         .padding(.horizontal, 16)
                                     
-                                    let popularProducts = MockProducts.products.filter { $0.isPopular }
+                                    let descriptor = FetchDescriptor<Product>()
+                                    let products = (try? Database.shared.context.fetch(descriptor)) ?? []
+                                    let popularProducts = products.filter { $0.isPopular }
                                     LazyVStack(spacing: 12) {
                                         ForEach(popularProducts.prefix(8)) { product in
                                             MyListRowItem(

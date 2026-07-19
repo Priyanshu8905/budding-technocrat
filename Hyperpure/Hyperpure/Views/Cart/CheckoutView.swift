@@ -41,14 +41,16 @@ struct CheckoutView: View {
                                 .foregroundColor(Theme.textMuted)
                             
                             ForEach(cartViewModel.items) { item in
-                                HStack {
-                                    Text("\(item.product.name) (x\(item.quantity))")
-                                        .font(.subheadline)
-                                        .foregroundColor(Theme.textPrimary)
-                                    Spacer()
-                                    Text("₹\(item.product.price * Double(item.quantity), specifier: "%.2f")")
-                                        .font(.subheadline.bold())
-                                        .foregroundColor(Theme.textPrimary)
+                                if let product = item.product {
+                                    HStack {
+                                        Text("\(product.name) (x\(item.quantity))")
+                                            .font(.subheadline)
+                                            .foregroundColor(Theme.textPrimary)
+                                        Spacer()
+                                        Text("₹\(product.price * Double(item.quantity), specifier: "%.2f")")
+                                            .font(.subheadline.bold())
+                                            .foregroundColor(Theme.textPrimary)
+                                    }
                                 }
                             }
                             

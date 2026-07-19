@@ -1,37 +1,36 @@
 // MyListViewModel.swift
-// ViewModel managing the user's custom favorite items list.
+// ViewModel managing the user's custom favorite items list using SwiftData.
 
 import Foundation
 import Observation
+import SwiftData
 
 @MainActor
 @Observable
-final class MyListViewModel {
-    static let shared = MyListViewModel()
+public final class MyListViewModel {
+    public static let shared = MyListViewModel()
     
-    private(set) var items: [Product] = []
+    public private(set) var items: [Product] = []
+    public var hasNewItems: Bool = false
     
-    /// Becomes true when a new item is added; cleared when the user visits My List tab.
-    var hasNewItems: Bool = false
-    
-    init() {
-        // Pre-populate with a few popular products from mock data
-        let allProducts = MockProducts.products
-        if allProducts.count >= 15 {
-            items = [
-                allProducts[0],  // Eggs
-                allProducts[1],  // Chicken Breast
-                allProducts[3]   // McCain French Fries
-            ]
+    private init() {
+        fetchFavorites()
+        if items.isEmpty {
+            seedInitialFavorites()
         }
-        // Don't flag pre-populated items as "new"
     }
     
-    func isFavorite(_ product: Product) -> Bool {
+    public func fetchFavorites() {
+        let descriptor = FetchDescriptor<SavedListItem>(sortBy: [SortDescriptor(\.savedAt, order: .reverse)])
+        let savedItems = (try? Database.shared.context.fetch(descriptor)) ?? []
+        self.items = savedItems.compactMap { $0.product }
+    }
+    
+    public func isFavorite(_ product: Product) -> Bool {
         items.contains(where: { $0.id == product.id })
     }
     
-    func toggleFavorite(_ product: Product) {
+    public func toggleFavorite(_ product: Product) {
         if isFavorite(product) {
             removeFavorite(product)
         } else {
@@ -39,19 +38,59 @@ final class MyListViewModel {
         }
     }
     
-    func addFavorite(_ product: Product) {
+    public func addFavorite(_ product: Product) {
+        let context = Database.shared.context
         if !isFavorite(product) {
-            items.append(product)
+            let productId = product.id
+            let prodDescriptor = FetchDescriptor<Product>(predicate: #Predicate { $0.id == productId })
+            let dbProduct = (try? context.fetch(prodDescriptor))?.first ?? product
+            
+            let newItem = SavedListItem(product: dbProduct)
+            context.insert(newItem)
+            try? context.save()
+            fetchFavorites()
             hasNewItems = true
         }
     }
     
-    func removeFavorite(_ product: Product) {
-        items.removeAll(where: { $0.id == product.id })
+    public func removeFavorite(_ product: Product) {
+        let context = Database.shared.context
+        let descriptor = FetchDescriptor<SavedListItem>()
+        if let savedItems = try? context.fetch(descriptor),
+           let target = savedItems.first(where: { $0.product?.id == product.id }) {
+            context.delete(target)
+            try? context.save()
+            fetchFavorites()
+        }
     }
     
-    /// Call when the user views the My List tab to dismiss the "NEW" badge.
-    func markAsSeen() {
+    public func createSmartListFromLastOrder() {
+        let context = Database.shared.context
+        let descriptor = FetchDescriptor<Order>(sortBy: [SortDescriptor(\.placedAt, order: .reverse)])
+        if let lastOrder = (try? context.fetch(descriptor))?.first {
+            for item in lastOrder.lineItems {
+                if let prod = item.product {
+                    addFavorite(prod)
+                }
+            }
+        }
+    }
+    
+    public func markAsSeen() {
         hasNewItems = false
+    }
+    
+    private func seedInitialFavorites() {
+        let context = Database.shared.context
+        let descriptor = FetchDescriptor<Product>()
+        if let allProducts = try? context.fetch(descriptor), allProducts.count >= 3 {
+            let initialSeeds = [allProducts[0], allProducts[1], allProducts[2]]
+            for prod in initialSeeds {
+                let newItem = SavedListItem(product: prod)
+                context.insert(newItem)
+            }
+            try? context.save()
+            fetchFavorites()
+        }
     }
 }
